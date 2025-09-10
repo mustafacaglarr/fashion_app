@@ -1,0 +1,58 @@
+name: fashion_app
+description: "A new Flutter project."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.6.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+
+  # 🔑 State management (MVVM için)
+  provider: ^6.1.2
+
+  # 📸 Görsel seçmek için
+  image_picker: ^1.1.1
+
+  # 🔑 Fal client (en güncel pub.dev sürümü)
+  fal_client: ^0.3.0
+
+  # 📂 fal.storage.upload için dosya tipi desteği
+  cross_file: ^0.3.4+2
+
+  # 🔑 Ortam değişkenleri (.env) için
+  flutter_dotenv: ^5.1.0
+
+  # 🌍 Proxy API veya ekstra HTTP istekleri için
+  http: ^1.2.2
+
+  # 🔧 Ek koleksiyon yardımcıları
+  collection: ^1.18.0
+
+  google_fonts: ^6.2.1
+  lottie: ^3.1.2
+  smooth_page_indicator: ^1.1.0
+  path_provider: ^2.1.3
+  shared_preferences: ^2.2.3
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - .env
+    - assets/hero.png
+    - assets/step1.png
+    - assets/step2.png
+    - assets/step3.png
+    - assets/trust.png
+    - assets/tryon.json
