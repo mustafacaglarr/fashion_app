@@ -1,41 +1,56 @@
 // lib/main.dart
+import 'package:fashion_app/ui/pages/profile_view.dart';
 import 'package:fashion_app/ui/pages/tryon_wizard_view.dart.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
+// Firebase
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+
+// UI / Theme
 import 'ui/theme.dart';
+
+// Pages
+import 'ui/pages/auth/auth_gate.dart';        // Login/Register yöneten kapı
 import 'ui/pages/landing_view.dart';
 import 'ui/pages/history_view.dart';
-import 'ui/pages/profile_view.dart';
 
+// ViewModels
 import 'ui/viewmodels/tryon_viewmodel.dart';
 import 'ui/viewmodels/history_viewmodel.dart';
+import 'ui/viewmodels/auth_viewmodel.dart';
+
+// Services / Repos
+import 'services/auth_service.dart';
 import 'data/fal_repository.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // .env opsiyonel: yoksa hata fırlatmasın
-  try {
-    await dotenv.load(fileName: ".env");
-  } catch (_) {
-    // .env yoksa sorun değil; --dart-define veya başka yöntemle verilebilir
-  }
+  // .env opsiyonel (yoksa app çalışmaya devam etsin)
+  try { await dotenv.load(fileName: ".env"); } catch (_) {}
 
-  // ÖNEM SIRASI: .env(FAL_KEY) -> --dart-define(FAL_KEY) -> boş
+  // Firebase'i başlat
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  // FAL key: .env(FAL_KEY) -> --dart-define(FAL_KEY) -> ''
   final envKey = dotenv.maybeGet('FAL_KEY') ?? '';
   const defineKey = String.fromEnvironment('FAL_KEY', defaultValue: '');
   final falKey = envKey.isNotEmpty ? envKey : defineKey;
 
-  // Not: Üretimde anahtarı istemciye vermeyin, kendi backend/proxy kullanın.
-  final repo = FalDirectRepository(falKey: falKey);
+  // Not: Prod'da anahtarı istemciye gömmeyin; backend/proxy kullanın.
+  final falRepo = FalDirectRepository(falKey: falKey);
 
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => TryonViewModel(repo)),
+        ChangeNotifierProvider(create: (_) => TryonViewModel(falRepo)),
         ChangeNotifierProvider(create: (_) => HistoryViewModel()..load()),
+        ChangeNotifierProvider(create: (_) => AuthViewModel(AuthService())),
       ],
       child: const VtonApp(),
     ),
@@ -50,17 +65,18 @@ class VtonApp extends StatelessWidget {
     return MaterialApp(
       title: 'VTON',
       debugShowCheckedModeBanner: false,
-      theme: buildTheme(), // ui/theme.dart
+      theme: buildTheme(),
 
-      // İstersen named route da kullan
+      // Uygulama içi rotalar
       routes: {
-        '/tryon': (_) => const TryOnWizardView(),
+        '/home'   : (_) => const LandingView(),
+        '/tryon'  : (_) => const TryOnWizardView(),
         '/history': (_) => const HistoryView(),
         '/profile': (_) => const ProfileView(),
       },
 
-      // İlk ekran
-      home: const LandingView(),
+      // İlk ekran → Auth durumuna göre Login/Register veya Landing
+      home: const AuthGate(),
     );
   }
 }

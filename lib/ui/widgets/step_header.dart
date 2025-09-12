@@ -20,7 +20,7 @@ class StepHeader extends StatelessWidget {
                 margin: EdgeInsets.only(right: i < 2 ? 6 : 0),
                 decoration: BoxDecoration(
                   color: active
-                      ? theme.colorScheme.primary
+                      ? const Color.fromARGB(255, 0, 38, 255)
                       : const Color(0xFFE1E3EF),
                   borderRadius: BorderRadius.circular(999),
                 ),

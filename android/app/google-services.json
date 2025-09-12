@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "547880124958",
+    "project_id": "fashion-ai-c2c4d",
+    "storage_bucket": "fashion-ai-c2c4d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:547880124958:android:ec2990c8242bcca3f4e40f",
+        "android_client_info": {
+          "package_name": "com.caglar.fashion_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC7doYB4dfhmuW2gmJfD40damQaLx6f6Uo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,12 +1,15 @@
+// android/app/build.gradle
 plugins {
     id "com.android.application"
     id "kotlin-android"
+    // Firebase Google Services plugin
+    id "com.google.gms.google-services"
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id "dev.flutter.flutter-gradle-plugin"
 }
 
 android {
-    namespace = "com.example.fashion_app"
+    namespace = "com.caglar.fashion_app"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -20,20 +23,21 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.fashion_app"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        applicationId = "com.caglar.fashion_app"
+
+        // Firebase Auth >=23.x için minSdk en az 23 olmalı
+        minSdk = 23
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+
+        // Çok sayıda method referansı için güvenli
+        multiDexEnabled true
     }
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
+            // Geliştirme için debug imzası ile
             signingConfig = signingConfigs.debug
         }
     }
@@ -41,4 +45,9 @@ android {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    // (Önerilen) Multidex kütüphanesi
+    implementation "androidx.multidex:multidex:2.0.1"
 }
