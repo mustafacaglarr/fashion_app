@@ -1,7 +1,7 @@
 // lib/main.dart
 import 'package:fashion_app/services/purchase_service.dart';
 import 'package:fashion_app/ui/pages/profile_view.dart';
-import 'package:fashion_app/ui/pages/tryon_wizard_view.dart.dart';
+import 'package:fashion_app/ui/pages/tryon_wizard_view.dart';
 import 'package:fashion_app/ui/viewmodels/plan_viewmodel.dart';
 import 'package:fashion_app/ui/viewmodels/settings_viewmodel.dart';
 import 'package:flutter/material.dart';

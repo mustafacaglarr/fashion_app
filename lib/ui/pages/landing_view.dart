@@ -1,4 +1,4 @@
-import 'package:fashion_app/ui/pages/tryon_wizard_view.dart.dart';
+import 'package:fashion_app/ui/pages/tryon_wizard_view.dart';
 import 'package:flutter/material.dart';
 import '../style/app_colors.dart';
 import '../widgets/hero_section.dart';
@@ -6,7 +6,7 @@ import '../widgets/stat_card.dart';
 import '../widgets/feature_grid.dart';
 import '../widgets/how_it_works.dart';
 import '../widgets/cta_banner.dart';
-import '../widgets/bottom_nav.dart'; // yolu sende farklıysa düzelt
+import '../widgets/bottom_nav.dart';
 
 class LandingView extends StatelessWidget {
   const LandingView({super.key});
@@ -21,9 +21,12 @@ class LandingView extends StatelessWidget {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
           children: [
-            HeroSection(onPrimaryCta: () {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const TryOnWizardView()));
-            }),
+            HeroSection(
+              onPrimaryCta: () {
+                // ✅ helper ile aç
+                TryOnWizardView.open(context);
+              },
+            ),
             const SizedBox(height: 16),
             Row(children: const [
               Expanded(child: StatCard(icon: Icons.groups_rounded, number: "50K+", label: "Aktif Kullanıcı")),
@@ -44,13 +47,13 @@ class LandingView extends StatelessWidget {
             CtaBanner(
               title: "Hemen Dene!",
               subtitle: "İlk denemen ücretsiz. Kıyafetlerin sende nasıl duracağını gör.",
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const TryOnWizardView())),
+              onTap: () => TryOnWizardView.open(context), // ✅ helper ile aç
             ),
           ],
         ),
       ),
       bottomNavigationBar: LandingBottomNav(
-        onTryNow: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const TryOnWizardView())),
+        onTryNow: () => TryOnWizardView.open(context), // ✅ helper ile aç
       ),
     );
   }

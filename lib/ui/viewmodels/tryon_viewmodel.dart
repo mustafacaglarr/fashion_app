@@ -113,10 +113,19 @@ class TryonViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void reset() {
-    state = TryonState.idle;
-    errorMessage = null;
-    results = [];
-    notifyListeners();
-  }
+ // TryonViewModel.dart (örnek)
+void reset() {
+  step = TryonStep.model;
+  modelPhoto = null;
+  garmentPhoto = null;
+  category = GarmentCategory.auto;
+  mode = TryonMode.balanced;
+  garmentPhotoType = 'auto';
+  results.clear();
+  state = TryonState.idle;
+  errorMessage = null;
+  notifyListeners();
+}
+
+  
 }

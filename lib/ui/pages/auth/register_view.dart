@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../services/auth_service.dart';     // Plan.basic için
+import '../../../services/auth_service.dart'; // Plan.basic için
 import '../../viewmodels/auth_viewmodel.dart';
 
 class RegisterView extends StatefulWidget {
@@ -18,6 +18,8 @@ class _RegisterViewState extends State<RegisterView> {
   final _email = TextEditingController();
   final _password = TextEditingController();
   bool _obscure = true;
+
+  String? _error; // 🔴 hata mesajı burada tutulacak
 
   @override
   void dispose() {
@@ -49,6 +51,34 @@ class _RegisterViewState extends State<RegisterView> {
               style: theme.textTheme.bodyMedium,
             ),
             const SizedBox(height: 18),
+
+            // 🔴 Hata mesajı kutusu
+            if (_error != null) ...[
+              Container(
+                padding: const EdgeInsets.all(12),
+                margin: const EdgeInsets.only(bottom: 12),
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(.08),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.red.withOpacity(.3)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.error_outline, color: Colors.red),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        _error!,
+                        style: const TextStyle(
+                          color: Colors.red,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
 
             Form(
               key: _form,
@@ -89,8 +119,6 @@ class _RegisterViewState extends State<RegisterView> {
                     validator: (v) => (v == null || v.length < 6) ? 'En az 6 karakter' : null,
                   ),
 
-                  // ⬇️ PLAN SEÇİMİ KALDIRILDI — herkes BASIC/FREE olacak
-
                   const SizedBox(height: 16),
                   SizedBox(
                     width: double.infinity,
@@ -103,20 +131,32 @@ class _RegisterViewState extends State<RegisterView> {
                                 name: _name.text.trim(),
                                 email: _email.text.trim(),
                                 password: _password.text.trim(),
-                                plan: Plan.basic, // ⬅️ her zaman FREE/BASIC
+                                plan: Plan.basic,
                               );
+
                               if (!ok && mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text(vm.error ?? 'Hata')),
-                                );
+                                // Firebase’den gelen hataya göre mesaj ayarla
+                                final code = vm.error ?? '';
+                                String msg;
+                                if (code.contains('email-already-in-use')) {
+                                  msg =
+                                      "Bu e-posta adresiyle zaten bir hesap oluşturulmuş. Lütfen giriş yapmayı deneyin.";
+                                } else {
+                                  msg = "Kayıt işlemi başarısız oldu. Lütfen tekrar deneyin.";
+                                }
+                                setState(() => _error = msg);
                               } else {
-                                if (mounted) Navigator.pop(context); // AuthGate otomatik yönlendirir
+                                if (mounted) Navigator.pop(context);
                               }
                             },
                       child: vm.isBusy
                           ? const SizedBox(
-                              height: 20, width: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
                             )
                           : const Text('Kayıt Ol'),
                     ),
@@ -135,7 +175,6 @@ class _RegisterViewState extends State<RegisterView> {
                   ),
 
                   const SizedBox(height: 8),
-                  // Google ile kayıt → ilk girişte de Plan.basic yazılacak (AuthService.loginWithGoogle planHint null ise basic)
                   OutlinedButton.icon(
                     icon: Image.asset('assets/google.png', height: 20),
                     label: const Text('Google ile kayıt ol'),

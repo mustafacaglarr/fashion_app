@@ -1,3 +1,4 @@
+import 'package:fashion_app/ui/pages/processing_view.dart';
 import 'package:fashion_app/ui/viewmodels/tryon_viewmodel.dart';
 import 'package:fashion_app/ui/widgets/filled_button_loading.dart';
 import 'package:fashion_app/ui/widgets/image_pick_card.dart';
@@ -5,46 +6,33 @@ import 'package:fashion_app/ui/widgets/step_header.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../data/tryon_models.dart';
-import 'result_view.dart';
 
 class TryOnWizardView extends StatefulWidget {
   const TryOnWizardView({super.key});
+
+  /// İstersen hep bunu çağır: yeni route + anında reset.
+  static Future<void> open(BuildContext context) async {
+    // yeni route'tan önce temizlik
+    context.read<TryonViewModel>().reset();
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const TryOnWizardView()),
+    );
+  }
+
   @override
   State<TryOnWizardView> createState() => _TryOnWizardViewState();
 }
 
 class _TryOnWizardViewState extends State<TryOnWizardView> {
-  bool _didResetOnEnter = false;
-
   @override
   void initState() {
     super.initState();
-    // Sayfa her açıldığında baştan başlat
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!_didResetOnEnter && mounted) {
-        context.read<TryonViewModel>().reset();
-        _didResetOnEnter = true;
-      }
+    // Bu sayfa HER oluşturulduğunda baştan başlat.
+    // microtask -> Provider bağlandıktan hemen sonra çalışır.
+    Future.microtask(() {
+      if (mounted) context.read<TryonViewModel>().reset();
     });
-  }
-
-  // Route başka bir sayfa lehine görünmez olduğunda (pop/cover)
-  @override
-  void deactivate() {
-    // Eğer bu route artık current değilse (geri dönüldü / kapandı), resetle
-    final isCurrent = ModalRoute.of(context)?.isCurrent ?? true;
-    if (!isCurrent) {
-      // idempotent olmalı; birden fazla kez çağrılsa da sorun olmaz
-      context.read<TryonViewModel>().reset();
-    }
-    super.deactivate();
-  }
-
-  @override
-  void dispose() {
-    // Ek güvence: sayfa tamamen yok olurken de reset
-    context.read<TryonViewModel>().reset();
-    super.dispose();
   }
 
   @override
@@ -69,11 +57,12 @@ class _TryOnWizardViewState extends State<TryOnWizardView> {
                 FilledButtonLoading(
                   loading: vm.state == TryonState.uploading || vm.state == TryonState.processing,
                   onPressed: vm.canSubmitFromConfirm
-                      ? () async {
-                          await vm.submit();
-                          if (vm.state == TryonState.done && context.mounted) {
-                            Navigator.push(context, MaterialPageRoute(builder: (_) => const ResultView()));
-                          }
+                      ? () {
+                          // Burada RESET YOK. Sadece processing’e git.
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const ProcessingView()),
+                          );
                         }
                       : null,
                   child: const Text("Dene"),
