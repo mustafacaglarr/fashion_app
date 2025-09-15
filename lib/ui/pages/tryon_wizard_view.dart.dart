@@ -7,8 +7,45 @@ import 'package:provider/provider.dart';
 import '../../../data/tryon_models.dart';
 import 'result_view.dart';
 
-class TryOnWizardView extends StatelessWidget {
+class TryOnWizardView extends StatefulWidget {
   const TryOnWizardView({super.key});
+  @override
+  State<TryOnWizardView> createState() => _TryOnWizardViewState();
+}
+
+class _TryOnWizardViewState extends State<TryOnWizardView> {
+  bool _didResetOnEnter = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Sayfa her açıldığında baştan başlat
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_didResetOnEnter && mounted) {
+        context.read<TryonViewModel>().reset();
+        _didResetOnEnter = true;
+      }
+    });
+  }
+
+  // Route başka bir sayfa lehine görünmez olduğunda (pop/cover)
+  @override
+  void deactivate() {
+    // Eğer bu route artık current değilse (geri dönüldü / kapandı), resetle
+    final isCurrent = ModalRoute.of(context)?.isCurrent ?? true;
+    if (!isCurrent) {
+      // idempotent olmalı; birden fazla kez çağrılsa da sorun olmaz
+      context.read<TryonViewModel>().reset();
+    }
+    super.deactivate();
+  }
+
+  @override
+  void dispose() {
+    // Ek güvence: sayfa tamamen yok olurken de reset
+    context.read<TryonViewModel>().reset();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,16 +61,10 @@ class TryOnWizardView extends StatelessWidget {
           return Row(
             children: [
               if (showBack)
-                OutlinedButton(
-                  onPressed: vm.goBack,
-                  child: const Text("Geri"),
-                ),
+                OutlinedButton(onPressed: vm.goBack, child: const Text("Geri")),
               if (showBack) const SizedBox(width: 12),
               if (showNext)
-                FilledButton(
-                  onPressed: () => vm.goNext(),
-                  child: const Text("İleri"),
-                ),
+                FilledButton(onPressed: vm.goNext, child: const Text("İleri")),
               if (showSubmit)
                 FilledButtonLoading(
                   loading: vm.state == TryonState.uploading || vm.state == TryonState.processing,
@@ -70,11 +101,7 @@ class TryOnWizardView extends StatelessWidget {
                     style: theme.textTheme.bodyMedium?.copyWith(color: Colors.black54),
                   ),
                   const SizedBox(height: 20),
-                  actionsBar(
-                    showBack: false,
-                    showNext: vm.canNextFromModel,
-                    showSubmit: false,
-                  ),
+                  actionsBar(showBack: false, showNext: vm.canNextFromModel, showSubmit: false),
                 ],
               );
 
@@ -95,11 +122,7 @@ class TryOnWizardView extends StatelessWidget {
                     style: theme.textTheme.bodyMedium?.copyWith(color: Colors.black54),
                   ),
                   const SizedBox(height: 20),
-                  actionsBar(
-                    showBack: true,
-                    showNext: vm.canNextFromGarment,
-                    showSubmit: false,
-                  ),
+                  actionsBar(showBack: true, showNext: vm.canNextFromGarment, showSubmit: false),
                 ],
               );
 
@@ -108,11 +131,8 @@ class TryOnWizardView extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 12),
-                  // Özet kartı
                   Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white, borderRadius: BorderRadius.circular(18),
-                    ),
+                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(18)),
                     padding: const EdgeInsets.all(16),
                     child: Column(
                       children: [
@@ -134,7 +154,6 @@ class TryOnWizardView extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 14),
-                  // Ayarlar (istersen kaldırma; burada değiştirmeye devam edebilirsin)
                   Row(children: [
                     Expanded(
                       child: DropdownButtonFormField<GarmentCategory>(
@@ -179,12 +198,7 @@ class TryOnWizardView extends StatelessWidget {
         int stepIndex(TryonStep s) => s == TryonStep.model ? 0 : s == TryonStep.garment ? 1 : 2;
 
         return Scaffold(
-          appBar: AppBar(
-            title: const Text("VTON — Sanal Deneme"),
-            actions: [
-              
-            ],
-          ),
+          appBar: AppBar(title: const Text("VTON — Sanal Deneme")),
           body: SafeArea(
             child: ListView(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),

@@ -40,8 +40,15 @@ class SettingTile extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
-        color: Colors.white, borderRadius: BorderRadius.circular(14),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(.03), blurRadius: 8, offset: const Offset(0, 4))],
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(.03),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          )
+        ],
       ),
       child: ListTile(
         onTap: onTap,
@@ -50,10 +57,25 @@ class SettingTile extends StatelessWidget {
           backgroundColor: const Color(0xFFF0F1F6),
           child: Icon(leading, color: Colors.black87),
         ),
-        title: Text(title, style: t.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
-        subtitle: (subtitle != null) ? Text(subtitle!, style: t.bodySmall?.copyWith(color: Colors.black54)) : null,
+        title: Text(
+          title,
+          style: t.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+        ),
+        subtitle: (subtitle != null)
+            ? Text(
+                subtitle!,
+                style: t.bodySmall?.copyWith(color: Colors.black54),
+              )
+            : null,
         trailing: isSwitch
-            ? Switch(value: switchValue, onChanged: onChanged)
+            ? Switch(
+                value: switchValue,
+                onChanged: onChanged,
+                activeColor: const Color.fromARGB(255, 18, 83, 137),            // aktif top
+                activeTrackColor: Colors.blue[200],  // aktif track
+                inactiveThumbColor: Colors.grey,     // pasif top gri
+                inactiveTrackColor: const Color.fromARGB(255, 255, 255, 255),// pasif track açık gri
+              )
             : (trailing ?? const Icon(Icons.chevron_right_rounded)),
       ),
     );

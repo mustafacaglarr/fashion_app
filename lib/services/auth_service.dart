@@ -89,4 +89,48 @@ class AuthService {
       'createdAt': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
   }
+
+
+   // ----- Re-auth -----
+  Future<void> reauthWithEmailPassword(String email, String password) async {
+    final user = _auth.currentUser;
+    if (user == null) throw FirebaseAuthException(code: 'no-current-user', message: 'Oturum bulunamadı');
+    final cred = EmailAuthProvider.credential(email: email, password: password);
+    await user.reauthenticateWithCredential(cred);
+  }
+
+  Future<void> reauthWithGoogle() async {
+    final user = _auth.currentUser;
+    if (user == null) throw FirebaseAuthException(code: 'no-current-user', message: 'Oturum bulunamadı');
+
+    final googleUser = await GoogleSignIn().signIn();
+    if (googleUser == null) throw FirebaseAuthException(code: 'abort-by-user', message: 'İşlem iptal edildi');
+    final googleAuth = await googleUser.authentication;
+
+    final cred = GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
+    await user.reauthenticateWithCredential(cred);
+  }
+
+  // ----- Verileri temizle -----
+  Future<void> deleteUserData() async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+    final uid = user.uid;
+
+    // Firestore users doc
+    try { await _db.collection('users').doc(uid).delete(); } catch (_) {}
+
+    // Eğer başka koleksiyonlarda kullanıcı verisi tutuyorsan burada sil
+    // ör: await _db.collection('orders').where('uid', isEqualTo: uid)...
+  }
+
+  // ----- Firebase kullanıcıyı sil -----
+  Future<void> deleteFirebaseUser() async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+    await user.delete();
+  }
 }

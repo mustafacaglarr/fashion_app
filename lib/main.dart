@@ -1,6 +1,9 @@
 // lib/main.dart
+import 'package:fashion_app/services/purchase_service.dart';
 import 'package:fashion_app/ui/pages/profile_view.dart';
 import 'package:fashion_app/ui/pages/tryon_wizard_view.dart.dart';
+import 'package:fashion_app/ui/viewmodels/plan_viewmodel.dart';
+import 'package:fashion_app/ui/viewmodels/settings_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -51,6 +54,8 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => TryonViewModel(falRepo)),
         ChangeNotifierProvider(create: (_) => HistoryViewModel()..load()),
         ChangeNotifierProvider(create: (_) => AuthViewModel(AuthService())),
+        ChangeNotifierProvider(create: (_) => SettingsViewModel()),
+        ChangeNotifierProvider(create: (_) => PlanViewModel()),
       ],
       child: const VtonApp(),
     ),
