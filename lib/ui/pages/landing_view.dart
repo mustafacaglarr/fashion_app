@@ -29,9 +29,9 @@ class LandingView extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Row(children: const [
-              Expanded(child: StatCard(icon: Icons.groups_rounded, number: "50K+", label: "Aktif Kullanıcı")),
+              Expanded(child: StatCard(icon: Icons.groups_rounded, number: "10K+", label: "Aktif Kullanıcı")),
               SizedBox(width: 10),
-              Expanded(child: StatCard(icon: Icons.favorite_rounded, number: "1M+", label: "Denenen Kıyafet")),
+              Expanded(child: StatCard(icon: Icons.favorite_rounded, number: "700K+", label: "Denenen Kıyafet")),
               SizedBox(width: 10),
               Expanded(child: StatCard(icon: Icons.trending_up_rounded, number: "99%", label: "Memnuniyet")),
             ]),

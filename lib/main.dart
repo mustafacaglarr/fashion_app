@@ -10,13 +10,14 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 // Firebase
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_options.dart';
 
 // UI / Theme
 import 'ui/theme.dart';
 
 // Pages
-import 'ui/pages/auth/auth_gate.dart';        // Login/Register yöneten kapı
+import 'ui/pages/auth/auth_gate.dart';
 import 'ui/pages/landing_view.dart';
 import 'ui/pages/history_view.dart';
 
@@ -32,7 +33,7 @@ import 'data/fal_repository.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // .env opsiyonel (yoksa app çalışmaya devam etsin)
+  // .env opsiyonel
   try { await dotenv.load(fileName: ".env"); } catch (_) {}
 
   // Firebase'i başlat
@@ -51,11 +52,32 @@ Future<void> main() async {
   runApp(
     MultiProvider(
       providers: [
+        // 1) FirebaseAuth durumunu tüm ağaçta erişilebilir yap
+        StreamProvider<User?>.value(
+          value: FirebaseAuth.instance.authStateChanges(),
+          initialData: FirebaseAuth.instance.currentUser,
+        ),
+
         ChangeNotifierProvider(create: (_) => TryonViewModel(falRepo)),
-        ChangeNotifierProvider(create: (_) => HistoryViewModel()..load()),
         ChangeNotifierProvider(create: (_) => AuthViewModel(AuthService())),
         ChangeNotifierProvider(create: (_) => SettingsViewModel()),
         ChangeNotifierProvider(create: (_) => PlanViewModel()),
+
+        // 2) HistoryViewModel'i mevcut kullanıcıyla başlat
+        //    (login yoksa 'anon' ile güvenli başlatır)
+        ChangeNotifierProxyProvider<User?, HistoryViewModel>(
+          create: (_) =>
+              HistoryViewModel(userKey: FirebaseAuth.instance.currentUser?.uid ?? 'anon')
+                ..load(),
+          update: (context, user, vm) {
+            final uid = user?.uid ?? 'anon';
+            // Oturum değiştiyse HistoryViewModel'i güncelle
+            if (vm != null && vm.userKey != uid) {
+              vm.setUser(uid); // setUser içinde items temizlenip load() çağrılıyor
+            }
+            return vm!;
+          },
+        ),
       ],
       child: const VtonApp(),
     ),
@@ -72,7 +94,6 @@ class VtonApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: buildTheme(),
 
-      // Uygulama içi rotalar
       routes: {
         '/home'   : (_) => const LandingView(),
         '/tryon'  : (_) => const TryOnWizardView(),
