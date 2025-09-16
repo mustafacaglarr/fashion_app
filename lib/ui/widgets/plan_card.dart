@@ -1,4 +1,4 @@
-import 'package:fashion_app/ui/viewmodels/plan_viewmodel.dart';
+import 'package:fashion_app/data/plan_models.dart';
 import 'package:flutter/material.dart';
 
 class PlanCard extends StatelessWidget {

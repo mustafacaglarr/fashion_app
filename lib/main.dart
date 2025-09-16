@@ -63,6 +63,11 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => SettingsViewModel()),
         ChangeNotifierProvider(create: (_) => PlanViewModel()),
 
+        // 🔹 PurchaseService'i en üste ekledik (PlanView vb. her yerden erişilsin)
+        ChangeNotifierProvider<PurchaseService>(
+          create: (_) => PurchaseService()..init(),
+        ),
+
         // 2) HistoryViewModel'i mevcut kullanıcıyla başlat
         //    (login yoksa 'anon' ile güvenli başlatır)
         ChangeNotifierProxyProvider<User?, HistoryViewModel>(

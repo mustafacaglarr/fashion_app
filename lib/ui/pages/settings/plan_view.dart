@@ -1,8 +1,10 @@
+import 'package:fashion_app/data/plan_models.dart';
+import 'package:fashion_app/services/purchase_service.dart';
+import 'package:fashion_app/ui/viewmodels/plan_viewmodel.dart';
 import 'package:fashion_app/ui/widgets/billing_toggle.dart';
 import 'package:fashion_app/ui/widgets/plan_card.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../viewmodels/plan_viewmodel.dart';
 
 class PlanView extends StatelessWidget {
   const PlanView({super.key});
@@ -34,8 +36,7 @@ class PlanView extends StatelessWidget {
             price: vm.priceLabel(PlanTier.basic),        // ⇦ "Ücretsiz"
             compareAt: vm.compareAt(PlanTier.basic),
             trial: vm.trialLabel(PlanTier.basic),         // ⇦ "İlk 7 gün ücretsiz"
-            monthlyEq: vm.monthlyEquivalent(PlanTier.basic),
-            finePrint: vm.finePrint(PlanTier.basic),      // ⇦ "7 günden sonra ₺xx/ay"
+            monthlyEq: vm.monthlyEquivalent(PlanTier.basic),    // ⇦ "7 günden sonra ₺xx/ay"
             selected: vm.selected == PlanTier.basic,
             onTap: () => vm.select(PlanTier.basic),
           ),
@@ -57,7 +58,6 @@ class PlanView extends StatelessWidget {
           compareAt: vm.compareAt(PlanTier.pro),
           trial: vm.trialLabel(PlanTier.pro),
           monthlyEq: vm.monthlyEquivalent(PlanTier.pro),
-          finePrint: vm.finePrint(PlanTier.pro),
           selected: vm.selected == PlanTier.pro,
           highlight: true, // 👈 Pro’yu turuncu yapar
           onTap: () => vm.select(PlanTier.pro),
@@ -97,15 +97,26 @@ class PlanView extends StatelessWidget {
                 ),
                 elevation: 3, // hafif gölge
               ),
-              onPressed: vm.selected == null ? null : () {
-                final chosen = vm.selected!;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text("${chosen.name.toUpperCase()} planı seçildi.")),
-                );
-                // 🔽 burada satın alma / Play Billing akışını başlatabilirsin
-              },
+              onPressed: vm.selected == null ? null : () async {
+                  final chosen = vm.selected!;
+                  final period = vm.period;
+
+                  final purchase = context.read<PurchaseService>();
+
+                  try {
+                    await purchase.buyFor(chosen, period);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("${chosen.name.toUpperCase()} için işlem başlatıldı.")),
+                    );
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("Satın alma hatası: $e")),
+                    );
+                  }
+                },
+
               child: const Text(
-                "Satın Almaya Devam Et",
+                "Ücretsiz Denemeyi Başlat",
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white),
               ),
             ),

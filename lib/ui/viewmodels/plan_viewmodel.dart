@@ -1,7 +1,6 @@
+import 'package:fashion_app/data/plan_models.dart';
 import 'package:flutter/foundation.dart';
 
-enum BillingPeriod { monthly, yearly }
-enum PlanTier { basic, pro, expert }
 
 class PlanPrice {
   final double monthly;       // Aylık abonelik ücreti
@@ -31,10 +30,7 @@ class PlanViewModel extends ChangeNotifier {
 
   // Ana fiyat etiketi
   String priceLabel(PlanTier t) {
-    // 🎯 Basic + Aylık = ÜCRETSİZ göster
-    if (t == PlanTier.basic && period == BillingPeriod.monthly) {
-      return "Ücretsiz";
-    }
+   
     final p = prices[t]!;
     if (period == BillingPeriod.yearly) {
       return "₺${_fmt(p.yearly)}";
@@ -43,15 +39,7 @@ class PlanViewModel extends ChangeNotifier {
     }
   }
 
-  // Küçük dipnot (free trial sonrası ücret)
-  String? finePrint(PlanTier t) {
-    if (t == PlanTier.basic && period == BillingPeriod.monthly) {
-      final m = prices[t]!.monthly;
-      return "7 günden sonra ₺${_fmt(m)}/ay";
-    }
-    // İstersen Pro/Expert için de benzer bir satır ekleyebilirsin
-    return null;
-  }
+ 
 
   // Yıllık ek etiket (aylık karşılığı)
   String? monthlyEquivalent(PlanTier t) {

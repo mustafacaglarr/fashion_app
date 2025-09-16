@@ -58,6 +58,22 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.14.4
+
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  # tek görselden tüm boyutları üretir (1024x1024 önerilir)
+  image_path: assets/app_icon_foreground.png
+
+  # ANDROID 8+ için adaptive icon (opsiyonel ama tavsiye edilir)
+  adaptive_icon_foreground: assets/app_icon_foreground.png
+  adaptive_icon_background: "#FFFFFF"   # veya assets ile görsel
+
+  # ANDROID 13+ “monochrome” (tema ikonları) – opsiyonel ama güzel
+  adaptive_icon_monochrome: assets/app_icon_foreground.png
+
 
 flutter:
   uses-material-design: true
