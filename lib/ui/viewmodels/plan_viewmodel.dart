@@ -58,7 +58,7 @@ class PlanViewModel extends ChangeNotifier {
     if (period != BillingPeriod.yearly) return null;
     final p = prices[t]!;
     final perMonth = p.yearly / 12;
-    return "₺${_fmt(perMonth)}/ay eşdeğer";
+    return "₺${_fmt(perMonth)}/ay";
   }
 
   String? compareAt(PlanTier t) {

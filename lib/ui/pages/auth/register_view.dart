@@ -131,7 +131,7 @@ class _RegisterViewState extends State<RegisterView> {
                                 name: _name.text.trim(),
                                 email: _email.text.trim(),
                                 password: _password.text.trim(),
-                                plan: Plan.basic,
+                                plan: Plan.free,
                               );
 
                               if (!ok && mounted) {

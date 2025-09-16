@@ -2,25 +2,31 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-enum Plan { basic, pro, expert }
+enum Plan { free, basic, pro, expert }
 
 extension PlanX on Plan {
   String get value => switch (this) {
+        Plan.free => 'free',
         Plan.basic => 'basic',
         Plan.pro => 'pro',
         Plan.expert => 'expert',
       };
+
   static Plan from(String s) {
     switch (s) {
+      case 'basic':
+        return Plan.basic;
       case 'pro':
         return Plan.pro;
       case 'expert':
         return Plan.expert;
+      case 'free':
       default:
-        return Plan.basic;
+        return Plan.free;
     }
   }
 }
+
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
