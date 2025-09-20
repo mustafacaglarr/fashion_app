@@ -1,12 +1,11 @@
 // android/app/build.gradle
 plugins {
     id "com.android.application"
-    id "kotlin-android"
-    // Firebase Google Services plugin
+    id "org.jetbrains.kotlin.android"
     id "com.google.gms.google-services"
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id "dev.flutter.flutter-gradle-plugin"
 }
+
 
 android {
     namespace = "com.caglar.fashion_app"
@@ -48,6 +47,8 @@ flutter {
 }
 
 dependencies {
+    
+    implementation platform("org.jetbrains.kotlin:kotlin-bom:2.0.21")
     // (Önerilen) Multidex kütüphanesi
     implementation "androidx.multidex:multidex:2.0.1"
 }

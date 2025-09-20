@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fashion_app/services/password_reset_service.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class ResetPasswordView extends StatefulWidget {
   const ResetPasswordView({super.key});
@@ -16,7 +17,7 @@ class _ResetPasswordViewState extends State<ResetPasswordView> {
   bool _busy = false;
   String? _error;
 
-  bool _sent = false; // ✅ Başarı ekranına geçiş için
+  bool _sent = false; // başarı ekranı için
   String _sentTo = "";
 
   @override
@@ -45,22 +46,22 @@ class _ResetPasswordViewState extends State<ResetPasswordView> {
       String msg;
       switch (e.code) {
         case 'invalid-email':
-          msg = 'E-posta adresi geçersiz görünüyor.';
+          msg = tr('errors.email_invalid');
           break;
         case 'user-not-found':
-          msg = 'Bu e-posta ile kayıtlı bir hesap bulunamadı.';
+          msg = tr('errors.reset_user_not_found');
           break;
         case 'missing-email':
-          msg = 'Lütfen e-posta adresinizi girin.';
+          msg = tr('errors.email_required');
           break;
         default:
-          msg = e.message ?? 'İşlem başarısız. Lütfen tekrar deneyin.';
+          msg = tr('errors.reset_generic');
       }
-      if (mounted) {
-        setState(() => _error = msg);
-      }
+      if (mounted) setState(() => _error = msg);
     } catch (e) {
-      if (mounted) setState(() => _error = 'Bir hata oluştu: $e');
+      if (mounted) {
+        setState(() => _error = tr('errors.unexpected_with_detail', namedArgs: {'error': '$e'}));
+      }
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -71,7 +72,7 @@ class _ResetPasswordViewState extends State<ResetPasswordView> {
     final t = Theme.of(context).textTheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Şifreyi Sıfırla')),
+      appBar: AppBar(title: Text(tr('auth.reset.title'))),
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 250),
         switchInCurve: Curves.easeOutCubic,
@@ -99,16 +100,20 @@ class _ResetPasswordViewState extends State<ResetPasswordView> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('Bağlantı gönderildi!',
-                                  style: t.titleMedium?.copyWith(
-                                      fontWeight: FontWeight.w800,
-                                      color: const Color(0xFF1B5E20))),
+                              Text(
+                                tr('auth.reset.success_title'),
+                                style: t.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                  color: const Color(0xFF1B5E20),
+                                ),
+                              ),
                               const SizedBox(height: 6),
                               Text(
-                                'Şifre sıfırlama bağlantısını $_sentTo adresine gönderdik. '
-                                'Gelen kutunu ve “Spam/İstenmeyen” klasörünü kontrol etmeyi unutma.',
+                                tr('auth.reset.success_desc',
+                                    namedArgs: {'email': _sentTo}),
                                 style: t.bodyMedium?.copyWith(
-                                    color: const Color(0xFF2E7D32)),
+                                  color: const Color(0xFF2E7D32),
+                                ),
                               ),
                             ],
                           ),
@@ -119,16 +124,15 @@ class _ResetPasswordViewState extends State<ResetPasswordView> {
                   const SizedBox(height: 16),
                   FilledButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Padding(
+                    child: Padding(
                       padding:
-                          EdgeInsets.symmetric(vertical: 14, horizontal: 8),
-                      child: Text('Geri dön'),
+                          const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+                      child: Text(tr('auth.reset.back')),
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'İpucu: Bağlantı gelmediyse birkaç dakika sonra tekrar deneyebilir '
-                    'veya e-posta adresinizde yazım hatası olup olmadığını kontrol edebilirsiniz.',
+                    tr('auth.reset.success_tip'),
                     style: t.bodySmall?.copyWith(color: Colors.black54),
                   ),
                 ],
@@ -138,12 +142,13 @@ class _ResetPasswordViewState extends State<ResetPasswordView> {
                 key: const ValueKey('form'),
                 padding: const EdgeInsets.all(16),
                 children: [
-                  Text('E-posta ile şifre sıfırla',
-                      style: t.headlineSmall
-                          ?.copyWith(fontWeight: FontWeight.w900)),
+                  Text(
+                    tr('auth.reset.form_title'),
+                    style: t.headlineSmall?.copyWith(fontWeight: FontWeight.w900),
+                  ),
                   const SizedBox(height: 6),
                   Text(
-                    'Kayıtlı e-posta adresini gir; sana şifre sıfırlama bağlantısı gönderelim.',
+                    tr('auth.reset.form_subtitle'),
                     style: t.bodyMedium,
                   ),
                   const SizedBox(height: 16),
@@ -182,17 +187,17 @@ class _ResetPasswordViewState extends State<ResetPasswordView> {
                       children: [
                         TextFormField(
                           controller: _email,
-                          decoration: const InputDecoration(
-                            labelText: 'E-posta',
-                            prefixIcon: Icon(Icons.email_outlined),
+                          decoration: InputDecoration(
+                            labelText: tr('auth.email'),
+                            prefixIcon: const Icon(Icons.email_outlined),
                           ),
                           keyboardType: TextInputType.emailAddress,
                           validator: (v) {
                             if (v == null || v.trim().isEmpty) {
-                              return 'E-posta gerekli';
+                              return tr('errors.email_required');
                             }
                             if (!v.contains('@')) {
-                              return 'Geçerli bir e-posta girin';
+                              return tr('errors.email_invalid');
                             }
                             return null;
                           },
@@ -211,7 +216,7 @@ class _ResetPasswordViewState extends State<ResetPasswordView> {
                                       color: Colors.white,
                                     ),
                                   )
-                                : const Text('Bağlantıyı Gönder'),
+                                : Text(tr('auth.reset.send_link')),
                           ),
                         ),
                       ],
@@ -219,9 +224,9 @@ class _ResetPasswordViewState extends State<ResetPasswordView> {
                   ),
 
                   const SizedBox(height: 12),
-                  const Text(
-                    'Not: Gelen kutunu ve spam/istenmeyen klasörünü kontrol etmeyi unutma.',
-                    style: TextStyle(color: Colors.black54),
+                  Text(
+                    tr('auth.reset.note'),
+                    style: const TextStyle(color: Colors.black54),
                   ),
                 ],
               ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class StepHeader extends StatelessWidget {
   final int currentIndex; // 0,1,2
@@ -7,7 +8,14 @@ class StepHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final titles = const ["Model", "Kıyafet", "Onay"];
+
+    // Çeviri tabanlı başlıklar
+    final titles = [
+      tr('tryon.steps.model'),
+      tr('tryon.steps.garment'),
+      tr('tryon.steps.confirm'),
+    ];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -31,13 +39,18 @@ class StepHeader extends StatelessWidget {
         const SizedBox(height: 12),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: List.generate(3, (i) => Text(
-            titles[i],
-            style: theme.textTheme.labelLarge?.copyWith(
-              fontWeight: i == currentIndex ? FontWeight.w700 : FontWeight.w500,
-              color: i == currentIndex ? theme.colorScheme.primary : Colors.black54,
+          children: List.generate(
+            3,
+            (i) => Text(
+              titles[i],
+              style: theme.textTheme.labelLarge?.copyWith(
+                fontWeight: i == currentIndex ? FontWeight.w700 : FontWeight.w500,
+                color: i == currentIndex
+                    ? theme.colorScheme.primary
+                    : Colors.black54,
+              ),
             ),
-          )),
+          ),
         ),
       ],
     );

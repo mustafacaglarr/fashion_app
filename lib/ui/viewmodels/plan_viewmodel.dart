@@ -1,10 +1,11 @@
 import 'package:fashion_app/data/plan_models.dart';
 import 'package:flutter/foundation.dart';
-
+import 'package:easy_localization/easy_localization.dart';
+import 'package:intl/intl.dart';
 
 class PlanPrice {
-  final double monthly;       // Aylık abonelik ücreti
-  final double yearly;        // Yıllık toplam (tek çekim)
+  final double monthly;
+  final double yearly;
   final double? yearlyCompareAt;
 
   const PlanPrice({
@@ -18,54 +19,76 @@ class PlanViewModel extends ChangeNotifier {
   BillingPeriod period = BillingPeriod.monthly;
   PlanTier? selected;
 
-  // ÖRNEK fiyatlar — istediğin gibi düzenleyebilirsin
-  final Map<PlanTier, PlanPrice> prices = const {
-    PlanTier.basic:  PlanPrice(monthly: 11.9, yearly: 96,  yearlyCompareAt: 120),
-    PlanTier.pro:    PlanPrice(monthly: 24.0, yearly: 216, yearlyCompareAt: 288),
-    PlanTier.expert: PlanPrice(monthly: 39.0, yearly: 360, yearlyCompareAt: 468),
+  /// 🇹🇷 Türkiye fiyatları (₺)
+  static const Map<PlanTier, PlanPrice> _pricesTr = {
+    PlanTier.basic:  PlanPrice(monthly: 99.0, yearly: 949.0, yearlyCompareAt: 1188.0),
+    PlanTier.pro:    PlanPrice(monthly: 249.0, yearly: 2399.0, yearlyCompareAt: 2988.0),
+    PlanTier.expert: PlanPrice(monthly: 499.0, yearly: 4799.0, yearlyCompareAt: 5988.0),
   };
 
-  void setPeriod(BillingPeriod p) { period = p; notifyListeners(); }
-  void select(PlanTier t) { selected = t; notifyListeners(); }
+  /// 🇪🇺 Avrupa fiyatları (€)
+  static const Map<PlanTier, PlanPrice> _pricesEn = {
+    PlanTier.basic:  PlanPrice(monthly: 4.99, yearly: 49.9, yearlyCompareAt: 59.88),
+    PlanTier.pro:    PlanPrice(monthly: 9.99, yearly: 99.9, yearlyCompareAt: 119.88),
+    PlanTier.expert: PlanPrice(monthly: 19.99, yearly: 199.9, yearlyCompareAt: 239.88),
+  };
 
-  // Ana fiyat etiketi
+  /// Aktif locale’e göre doğru fiyat tablosunu seç
+  Map<PlanTier, PlanPrice> get prices {
+    final locale = Intl.getCurrentLocale();
+    return locale.startsWith('tr') ? _pricesTr : _pricesEn;
+  }
+
+  void setPeriod(BillingPeriod p) {
+    period = p;
+    notifyListeners();
+  }
+
+  void select(PlanTier t) {
+    selected = t;
+    notifyListeners();
+  }
+
   String priceLabel(PlanTier t) {
-   
     final p = prices[t]!;
+    final currency = tr('plans.currency');
     if (period == BillingPeriod.yearly) {
-      return "₺${_fmt(p.yearly)}";
+      return "$currency${_fmt(p.yearly)} ${tr('plans.period.year')}";
     } else {
-      return "₺${_fmt(p.monthly)}/ay";
+      return "$currency${_fmt(p.monthly)} ${tr('plans.period.month')}";
     }
   }
 
- 
-
-  // Yıllık ek etiket (aylık karşılığı)
   String? monthlyEquivalent(PlanTier t) {
     if (period != BillingPeriod.yearly) return null;
     final p = prices[t]!;
     final perMonth = p.yearly / 12;
-    return "₺${_fmt(perMonth)}/ay";
+    final currency = tr('plans.currency');
+    return "$currency${_fmt(perMonth)} ${tr('plans.period.month')}";
   }
 
   String? compareAt(PlanTier t) {
     final p = prices[t]!;
     if (period == BillingPeriod.yearly && p.yearlyCompareAt != null) {
-      return "₺${_fmt(p.yearlyCompareAt!)}";
+      final currency = tr('plans.currency');
+      return "$currency${_fmt(p.yearlyCompareAt!)}";
     }
     return null;
   }
 
-  // Aylık tarafta rozet metni
-  String? trialLabel(PlanTier t) {
+    String? trialLabel(PlanTier t) {
     if (period == BillingPeriod.yearly) return null;
     switch (t) {
-      case PlanTier.basic:  return "İlk 7 gün ücretsiz";
+      case PlanTier.basic:
+        return tr('plans.trial.basic'); // 7 gün free
       case PlanTier.pro:
-      case PlanTier.expert: return "İlk 1 ay ücretsiz";
+        return tr('plans.trial.pro');   // 1 ay free
+      case PlanTier.expert:
+        return null; // ❌ Expert için etiket yok
     }
   }
 
-  String _fmt(double v) => v.toStringAsFixed(v.truncateToDouble() == v ? 0 : 1);
+
+  String _fmt(double v) =>
+      v.toStringAsFixed(v.truncateToDouble() == v ? 0 : 2);
 }

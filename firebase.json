@@ -1,1 +1,41 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"fashion-ai-c2c4d","appId":"1:547880124958:android:ec2990c8242bcca3f4e40f","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"fashion-ai-c2c4d","configurations":{"android":"1:547880124958:android:ec2990c8242bcca3f4e40f","ios":"1:547880124958:ios:21e6b72b4119a0f8f4e40f","macos":"1:547880124958:ios:21e6b72b4119a0f8f4e40f","web":"1:547880124958:web:bb3c1cd83b9e15e5f4e40f","windows":"1:547880124958:web:7d4556ecc56f4835f4e40f"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "fashion-ai-c2c4d",
+          "appId": "1:547880124958:android:ec2990c8242bcca3f4e40f",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "fashion-ai-c2c4d",
+          "configurations": {
+            "android": "1:547880124958:android:ec2990c8242bcca3f4e40f",
+            "ios": "1:547880124958:ios:21e6b72b4119a0f8f4e40f",
+            "macos": "1:547880124958:ios:21e6b72b4119a0f8f4e40f",
+            "web": "1:547880124958:web:bb3c1cd83b9e15e5f4e40f",
+            "windows": "1:547880124958:web:7d4556ecc56f4835f4e40f"
+          }
+        }
+      }
+    }
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ],
+      "predeploy": [
+        "npm --prefix \"$RESOURCE_DIR\" run build"
+      ]
+    }
+  ]
+}

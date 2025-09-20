@@ -1,10 +1,12 @@
 // lib/ui/pages/result_view.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:easy_localization/easy_localization.dart';          // ⬅️ i18n
+                 // ⬅️ Paylaşım
 
 import 'package:fashion_app/ui/viewmodels/tryon_viewmodel.dart';
 import 'package:fashion_app/ui/viewmodels/history_viewmodel.dart';
-import 'landing_view.dart'; // ana sayfa import
+import 'landing_view.dart';
 
 class ResultView extends StatefulWidget {
   const ResultView({super.key});
@@ -18,10 +20,7 @@ class _ResultViewState extends State<ResultView> {
   String _bannerText = "";
 
   Future<void> _showBanner(String msg) async {
-    setState(() {
-      _bannerText = msg;
-      _bannerVisible = true;
-    });
+    setState(() { _bannerText = msg; _bannerVisible = true; });
     await Future.delayed(const Duration(seconds: 2));
     if (!mounted) return;
     setState(() => _bannerVisible = false);
@@ -38,24 +37,21 @@ class _ResultViewState extends State<ResultView> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: () async {
-        _goHome(context);
-        return false; // default pop olmasın
-      },
+      onWillPop: () async { _goHome(context); return false; },
       child: Consumer<TryonViewModel>(
         builder: (context, vm, _) {
           return Scaffold(
             appBar: AppBar(
-              title: const Text("Sonuç"),
+              title: Text(tr('result.title')),
               leading: IconButton(
                 icon: const Icon(Icons.arrow_back),
                 onPressed: () => _goHome(context),
               ),
               actions: [
                 IconButton(
-                  icon: const Icon(Icons.refresh),
-                  onPressed: vm.reset,
-                  tooltip: "Yeni dene",
+                  icon: const Icon(Icons.share),
+                  tooltip: tr('result.share'),
+                  onPressed: vm.results.isEmpty ? null : () {},
                 ),
               ],
             ),
@@ -63,7 +59,7 @@ class _ResultViewState extends State<ResultView> {
               child: Stack(
                 children: [
                   vm.results.isEmpty
-                      ? const Center(child: Text("Henüz sonuç yok."))
+                      ? Center(child: Text(tr('result.empty')))
                       : ListView.separated(
                           padding: const EdgeInsets.all(16),
                           itemCount: vm.results.length,
@@ -98,15 +94,15 @@ class _ResultViewState extends State<ResultView> {
                                     final hist = context.read<HistoryViewModel>();
                                     try {
                                       await hist.saveFromUrl(url);
-                                      if (mounted) _showBanner("Geçmişe kaydedildi");
+                                      if (mounted) _showBanner(tr('result.banner.saved'));
                                     } catch (_) {
-                                      if (mounted) _showBanner("Kaydedilemedi");
+                                      if (mounted) _showBanner(tr('result.banner.save_failed'));
                                     }
                                   },
                                   icon: const Icon(Icons.download_rounded, color: Colors.black),
-                                  label: const Text(
-                                    "Kaydet",
-                                    style: TextStyle(
+                                  label: Text(
+                                    tr('result.save'),
+                                    style: const TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w600,
                                       color: Colors.black,

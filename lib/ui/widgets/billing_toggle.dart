@@ -1,5 +1,6 @@
 import 'package:fashion_app/data/plan_models.dart';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class BillingToggle extends StatelessWidget {
   final BillingPeriod value;
@@ -10,7 +11,11 @@ class BillingToggle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final surface = Colors.grey.shade100; // nötr arka plan
-    final primary = Colors.teal; // ✅ güven verici yeşil (turuncuyla uyumlu)
+    final primary = Colors.teal;          // güven verici yeşil
+
+    final monthlyLabel = tr('plans.billing.monthly');
+    final yearlyLabel  = tr('plans.billing.yearly');
+    final yearlyNote   = tr('plans.billing.yearly_note'); // "En avantajlı" / "Best value"
 
     return Container(
       padding: const EdgeInsets.all(6),
@@ -23,7 +28,7 @@ class BillingToggle extends StatelessWidget {
         children: [
           Expanded(
             child: _ChipButton(
-              text: "Aylık",
+              text: monthlyLabel,
               selected: value == BillingPeriod.monthly,
               onTap: () => onChanged(BillingPeriod.monthly),
               selectedColor: primary,
@@ -32,7 +37,8 @@ class BillingToggle extends StatelessWidget {
           const SizedBox(width: 8),
           Expanded(
             child: _ChipButton(
-              text: "Yıllık",
+              text: yearlyLabel,
+              trailing: yearlyNote, // opsiyonel alt etiket
               selected: value == BillingPeriod.yearly,
               onTap: () => onChanged(BillingPeriod.yearly),
               selectedColor: primary,
@@ -82,7 +88,7 @@ class _ChipButton extends StatelessWidget {
                 fontWeight: FontWeight.w800,
               ),
             ),
-            if (trailing != null) ...[
+            if (trailing != null && trailing!.isNotEmpty) ...[
               const SizedBox(height: 4),
               Text(
                 trailing!,

@@ -1,0 +1,462 @@
+{
+  "app_title": "Auria",
+  "auth": {
+    "login_title": "Sign In",
+    "welcome_back": "Welcome back 👋",
+    "login_subtitle": "Sign in to your account or continue with Google.",
+    "email": "Email",
+    "password": "Password",
+    "forgot_password": "Forgot your password?",
+    "or": "or",
+    "continue_with_google": "Continue with Google",
+    "no_account": "Don’t have an account?",
+    "register": "Sign up",
+    "submit_login": "Sign In",
+    "register_title": "Sign Up",
+    "join_us": "Join us! 🚀",
+    "register_subtitle": "Create your free account with email and password. You can upgrade to Pro/Expert later.",
+    "full_name": "Full name",
+    "already_member": "Already a member?",
+    "sign_in": "Sign in",
+    "submit_register": "Create account",
+    "register_with_google": "Sign up with Google",
+    "reset": {
+      "title": "Reset Password",
+      "form_title": "Reset via email",
+      "form_subtitle": "Enter your registered email address and we’ll send you a password reset link.",
+      "send_link": "Send Link",
+      "note": "Note: Don’t forget to check your inbox and the spam/junk folder.",
+      "success_title": "Link sent!",
+      "success_desc": "We’ve sent a reset link to {email}. Please check your inbox and the spam folder.",
+      "success_tip": "Tip: If the email doesn’t arrive, try again in a few minutes or check for typos.",
+      "back": "Go back"
+    }
+  },
+  "errors": {
+    "login_generic": "Please check the information you entered.",
+    "email_invalid": "Enter a valid email",
+    "password_min": "At least 6 characters",
+    "name_required": "Please enter your name",
+    "email_in_use": "An account already exists with this email. Please sign in.",
+    "register_generic": "Registration failed. Please try again.",
+    "email_required": "Email is required",
+    "reset_user_not_found": "No account found with this email.",
+    "reset_generic": "Could not send the reset link. Please try again.",
+    "unexpected_with_detail": "An error occurred: {error}",
+    "generic": "Something went wrong."
+  },
+  "home": {
+    "hero": {
+      "welcome": "Welcome! ✨",
+      "title": "Try On Clothes Virtually",
+      "subtitle": "See instantly how outfits look on you with AI",
+      "cta_start": "Get Started"
+    },
+
+    "features": {
+      "instant": {
+        "title": "Instant Try-On",
+        "subtitle": "Snap your photo, pick an outfit, see the result"
+      },
+      "history": {
+        "title": "Browse History",
+        "subtitle": "Revisit what you've tried"
+      },
+      "favorites": {
+        "title": "Favorites",
+        "subtitle": "Save looks you love"
+      },
+      "fast": {
+        "title": "Fast Results",
+        "subtitle": "Realistic results in 3s with AI"
+      }
+    },
+    "howitworks": {
+      "step1": {
+        "title": "Take Your Photo",
+        "subtitle": "Take a photo or pick from gallery"
+      },
+      "step2": {
+        "title": "Choose Outfit",
+        "subtitle": "Upload the outfit you want to try"
+      },
+      "step3": {
+        "title": "See the Result",
+        "subtitle": "Review the AI-generated result and save"
+      }
+    },
+     "sections": {
+      "what_can_you_do": "What Can You Do?",
+      "how_it_works": "How It Works?"
+    },
+    "stats": {
+      "active_users": "Active Users",
+      "outfits_tried": "Outfits Tried",
+      "satisfaction": "Satisfaction"
+    },
+    "cta": {
+      "title": "Try it now!",
+      "subtitle": "Your first try is free. See how outfits look on you.",
+      "button": "Let’s get started"
+    }
+    
+  },
+  "tryon": {
+    "appbar_title": "VTON — Virtual Try-On",
+    "actions": { "back": "Back", "next": "Next", "try": "Try" },
+    "model": {
+      "title": "Model Photo",
+      "subtitle": "Clear face & torso, plain background",
+      "tip": "Tip: Single person, good lighting, plain background gives best results."
+    },
+    "mode": {
+    "balanced": "Balanced",
+    "quality": "Quality",
+    "speed": "Speed",
+    "performance": "Performance"
+  },
+    "garment": {
+      "title": "Clothing Photo",
+      "subtitle": "Flat-lay or clear mannequin shot",
+      "tip": "Tip: Flat-lay or a sharp mannequin photo works best."
+    },
+    "confirm": {
+      "summary": { "category": "Category", "mode": "Mode", "photo_type": "Clothing Photo Type" }
+    },
+    "category": { "auto": "Auto","tops": "Tops",
+      "bottoms": "Bottoms",
+      "onePieces": "One-pieces"},
+    "photoType": { "auto": "Auto", "model": "On-model", "flat-lay": "Flat-lay" },
+    "steps": {
+      "model": "Model",
+      "garment": "Clothing",
+      "confirm": "Confirm"
+    },
+      "quota": {
+    "title": "You’ve reached your limit",
+    "message_paid": "You’ve used all your monthly tries. You can upgrade your plan or try again when your quota resets.",
+    "period": {
+    "daily": "daily",
+    "monthly": "monthly"
+  },
+  "errors": {
+    "no_session": "No active session.",
+    "free_daily_exceeded": "Your daily trial limit is reached. Try again tomorrow or upgrade your plan.",
+    "paid_monthly_exceeded": "Your monthly trial limit is reached. Upgrade your plan or wait for next month.",
+    "generic": "You are not eligible to try right now."
+  }
+  }
+  },
+  "processing": {
+    "title": "Processing images…",
+    "subtitle": "This may take a few seconds.",
+    "missing_images": "Please select both images.",
+    "generic_error": "Something went wrong."
+  },
+   "result": {
+    "title": "Results",
+    "share": "Share",
+    "share_subject": "My try-on result",
+    "empty": "No results yet.",
+    "save": "Save",
+    "banner": {
+      "saved": "Saved to history",
+      "save_failed": "Could not save"
+    }
+  },
+  "nav": {
+    "home": "Home",
+    "try": "Try On",
+    "history": "History",
+    "profile": "Profile"
+  },
+    "history": {
+    "title": "History",
+    "clear_all": "Clear all",
+    "clear": "Clear",
+    "empty": "No saved items yet.",
+    "dialog": {
+      "clear_title": "Clear history?",
+      "clear_content": "All saved images will be deleted."
+    }
+  },
+  "common": {
+    "cancel": "Cancel",
+    "save": "Save",
+    "ok": "OK",
+    "back": "Back",
+    "continue": "Continue",
+    "delete": "Delete",
+    "delete_permanently": "Delete Permanently",
+    "close": "Close"
+  },
+  "profile": {
+    "title": "Profile",
+    "errors": { "not_found": "User info not found" },
+    "sections": {
+      "account_security": "Account & Security",
+      "notifications": "Notifications",
+      "subscription": "Subscription",
+      "other": "Other"
+    },
+    "items": {
+      "profile_info": { "title": "Profile Info", "subtitle": "Name, surname, email" },
+      "privacy": { "title": "Privacy", "subtitle": "Data processing & permissions" },
+      "reset_password": { "title": "Reset Password", "subtitle": "Send a reset link via email" },
+      "delete_account": { "title": "Delete Account", "subtitle": "Permanently remove all data" },
+      "face_local_store": { "title": "Store face data locally", "subtitle": "Keep it on device; don’t upload to cloud" },
+      "push_notifications": { "title": "Push Notifications", "subtitle": "Promotions and result reminders" },
+      "plan": { "title": "My Plan" },
+      "help": { "title": "Help & Support", "subtitle": "FAQ, contact" },
+      "about": { "title": "About", "version": "Version: {version}" }
+    },
+    "edit": {                          
+    "title": "Profile Info",
+    "save_failed_with_error": "Could not save: {error}"
+    },
+    "plan": { "free": "Free", "basic": "Basic", "pro": "Pro", "expert": "Expert" },
+    "logout": {
+      "button": "Log out",
+      "confirm_title": "Are you sure you want to log out?",
+      "confirm_action": "Log out"
+    }
+  },
+  "privacy": {
+    "title": "Privacy",
+    "summary": {
+      "title": "Privacy Principles",
+      "body": "This page explains the personal data processed in our app, purposes of processing, legal bases, retention periods, and user rights. Scope is aligned with KVKK (6698) and GDPR."
+    },
+    "sections": {
+      "processed_data": {
+        "title": "Categories of Data Processed",
+        "items": {
+          "0": "Account data: name (optional), email.",
+          "1": "Usage data: in-app interactions, error/performance logs (anonymized where possible).",
+          "2": "Device data: model, OS version, language/region.",
+          "3": "Processing images: your model photo and clothing image used only for processing, without permanent storage."
+        }
+      },
+      "purposes": {
+        "title": "Purposes of Processing",
+        "items": {
+          "0": "Providing the service: generating the virtual try-on result.",
+          "1": "Account management: authentication and session continuity.",
+          "2": "Security: abuse detection and prevention of fraudulent/harmful content.",
+          "3": "Product improvement: enhancing experience with anonymized statistics.",
+          "4": "Legal compliance: acting in accordance with law in case of requests/disputes."
+        }
+      },
+      "legal_basis": {
+        "title": "Legal Basis",
+        "items": {
+          "0": "Consent (GDPR Art. 6/1-a, KVKK Art. 5/1): processing of images.",
+          "1": "Contract performance (GDPR Art. 6/1-b): providing the service and account management.",
+          "2": "Legitimate interest (GDPR Art. 6/1-f): fraud prevention, security, and product improvement.",
+          "3": "Legal obligation (GDPR Art. 6/1-c): record keeping, responding to official requests."
+        }
+      },
+      "retention": {
+        "title": "Retention",
+        "items": {
+          "0": "Try-on images: used only during processing and deleted once the process is complete.",
+          "1": "Account data: kept until your account is deleted or as required by law.",
+          "2": "Logs/analytics: stored for a limited time in anonymized form whenever possible."
+        }
+      },
+      "third_parties": {
+        "title": "Transfers & Third Parties",
+        "items": {
+          "0": "Authentication/infrastructure providers (e.g., identity, error/performance monitoring).",
+          "1": "Image processing provider: your images are processed only to generate the requested try-on output; no permanent storage.",
+          "2": "Service vendors may access data only under contractual confidentiality and security obligations and strictly for intended purposes."
+        }
+      },
+      "cross_border": {
+        "title": "Cross-Border Transfers",
+        "items": {
+          "0": "Some providers may be located abroad. Transfers rely on adequacy decisions, standard contractual clauses, and additional safeguards."
+        }
+      },
+      "security": {
+        "title": "Security",
+        "items": {
+          "0": "Appropriate technical/organizational measures for transmission and storage (encryption, access control, network security).",
+          "1": "Risk-based approach against unauthorized access, disclosure, alteration, and destruction."
+        }
+      },
+      "user_rights": {
+        "title": "User Rights",
+        "items": {
+          "0": "Right of access and information.",
+          "1": "Rectification and update.",
+          "2": "Erasure (right to be forgotten) and account deletion.",
+          "3": "Restriction of processing and data portability.",
+          "4": "Withdrawal of consent (does not affect lawfulness of processing before withdrawal).",
+          "5": "Right to object (to processing based on legitimate interest)."
+        }
+      },
+      "children": {
+        "title": "Children’s Data",
+        "items": {
+          "0": "The service is not directed to children under 13. If such accounts are detected, they are closed and data is deleted."
+        }
+      },
+      "cookies": {
+        "title": "Cookies & Similar Technologies",
+        "items": {
+          "0": "Limited on-device storage may be used for remembering preferences and performance measurement. In any browser component, mandatory vs. optional cookies are distinguished."
+        }
+      },
+      "contact": {
+        "title": "Contact",
+        "items": {
+          "0": "Data Controller: App Operator",
+          "1": "Email: mustafa.caglar147@gmail.com",
+          "2": "Address: Ankara/Türkiye"
+        }
+      },
+      "updates": {
+        "title": "Updates",
+        "items": {
+          "0": "The privacy policy may be updated periodically. We will notify you of material changes via in-app notice and/or email."
+        }
+      }
+    }
+  },
+  "delete": {
+  "title": "Delete Account",
+  "steps": {
+    "warning": "Warning",
+    "reauth": "Re-authentication",
+    "confirm": "Final Confirmation",
+    "reauth_title": "Re-authentication"
+  },
+  "wizard": {
+    "warning_text": "This action is permanent. Your account info, history images, and local profile avatar will be deleted.",
+    "verified": "Identity verified",
+    "confirm_word": "DELETE",
+    "confirm_instruction": "To continue, type {word} in ALL CAPS in the box below.",
+    "confirm_mismatch": "The input does not match. Please type {word} in ALL CAPS.",
+    "confirm_label": "Type {word}"
+  },
+  "inputs": {
+    "email_hint": "name@example.com",
+    "show_password": "Show password",
+    "hide_password": "Hide password"
+  },
+  "actions": {
+    "reauth_email": "Verify with Email",
+    "reauth_google": "Verify with Google",
+    "delete_permanently": "Delete Permanently"
+  },
+  "dialog": {
+    "title": "Account Deleted",
+    "content": "Your account and data have been permanently removed."
+  },
+  "errors": {
+    "session_missing": "No active session found.",
+    "google_failed": "Google verification failed.",
+    "needs_recent_login": "Deletion failed (you may need to sign in again).",
+    "delete_failed": "Deletion failed: {error}",
+    "missing_credentials": "Email and password are required.",
+    "codes": {
+      "user_not_found": "No user found with this email.",
+      "wrong_password": "Incorrect password. Please try again.",
+      "invalid_email": "Invalid email address.",
+      "missing_credentials": "Email and password are required.",
+      "user_disabled": "This account has been disabled.",
+      "too_many_requests": "Too many attempts. Please try again later.",
+      "auth_failed": "Authentication failed. ({code})"
+    }
+  }
+},
+ "notifications": {
+    "title": "Notifications",
+    "push_title": "Push Notifications",
+    "push_subtitle": "Promotions and result reminders",
+    "note": "Note: iOS/Android system permissions may also be requested."
+  },
+   "help": {
+    "title": "Help & Support",
+    "contact_us": "Contact Us"
+  },
+  "about": {
+    "title": "About",
+    "version": "Version: {version}",
+    "description": "This app makes virtual outfit try-on easy with AI."
+  },
+  "plans": {
+    "title_upgrade": "Upgrade Your Plan",
+    "tiers": {
+      "basic": "Basic",
+      "pro": "Pro",
+      "expert": "Expert"
+    },
+    "currency": "€",
+    "period": {
+    "month": "/month",
+    "year": "/year"
+  },
+  "trial": {
+    "basic": "First 7 days free",
+    "pro": "First 1 month free",
+    "expert": ""
+  },
+     "billing": {
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "yearly_note": "Best value"
+    },
+    "cta": {
+      "start_free": "Start 7-day free trial",
+      "start_7day_trial": "Start 30-day free trial",
+      "select_plan": "Select a plan",
+      "buy_now": "Buy now"
+    },
+    "snack": {
+      "purchase_started": "Started purchase for {tier}.",
+      "purchase_error": "Purchase error: {error}"
+    },
+    "basic": {
+      "title": "Basic",
+      "description": "Try now: Enough for a first impression.",
+      "bullets": {
+        "0": "50 results/month",
+        "1": "Standard resolution",
+        "2": "Watermarked output",
+        "3": "Basic pose matching",
+        "4": "No ads"
+      }
+    },
+    "pro": {
+      "title": "Pro",
+      "description": "More realistic results with HD quality.",
+      "bullets": {
+        "0": "100 results/month",
+        "1": "HD resolution",
+        "2": "Lighting/skin tone matching (color match)",
+        "3": "Pose normalization (alignment)",
+        "4": "No watermark · Fast queue",
+        "5": "No ads"
+      }
+    },
+    "expert": {
+      "title": "Expert",
+      "description": "Pro speed, pro realism.",
+      "bullets": {
+        "0": "200 results/month",
+        "1": "Realistic shadows & wrinkles",
+        "2": "Unlimited size/color comparisons",
+        "3": "Commercial license · 5 team members",
+        "4": "No ads",
+        "5": "Priority live support"
+      }
+    },
+
+     "actions": {
+    "upgrade": "Upgrade plan"
+  }
+  }
+
+}

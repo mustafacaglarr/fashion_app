@@ -2,8 +2,10 @@
 import 'dart:io';
 import 'package:fashion_app/data/fal_repository.dart';
 import 'package:fashion_app/data/tryon_models.dart';
+import 'package:fashion_app/services/tryon_quota_service_firebase.dart';
 import 'package:flutter/foundation.dart';
 import 'package:cross_file/cross_file.dart';
+import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 enum TryonState { idle, picking, uploading, processing, done, error }
@@ -23,8 +25,9 @@ class TryonViewModel extends ChangeNotifier {
   List<TryonResultImage> results = [];
 
   final ImagePicker _picker = ImagePicker();
+  final TryOnQuotaService quotaService;
 
-  TryonViewModel(this.repo);
+  TryonViewModel(this.repo, {required this.quotaService});
 
   void setCategory(GarmentCategory c) { category = c; notifyListeners(); }
   void setMode(TryonMode m) { mode = m; notifyListeners(); }
@@ -49,6 +52,21 @@ class TryonViewModel extends ChangeNotifier {
     if (x != null) { garmentPhoto = XFile(x.path); }
     state = TryonState.idle; notifyListeners();
   }
+Future<QuotaResult?> submitWithQuota() async {
+  final qr = await quotaService.tryConsumeOne();
+
+  if (!qr.allowed) {
+    // VM içinde sadece sade bir teknik mesaj tut (UI i18n yapacak)
+    errorMessage = qr.code; // 'free_daily_exceeded' vs.
+    state = TryonState.error;
+    notifyListeners();
+    return qr;
+  }
+
+  await submit();
+  return qr;
+}
+
 
   Future<void> submit() async {
     if (modelPhoto == null || garmentPhoto == null) {

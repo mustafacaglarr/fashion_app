@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart'; // ⬅️ eklendi
 import '../style/app_colors.dart';
 
 class CtaBanner extends StatelessWidget {
@@ -15,22 +16,25 @@ class CtaBanner extends StatelessWidget {
         gradient: const LinearGradient(colors: [AppColors.g1, AppColors.g2]),
         borderRadius: BorderRadius.circular(18),
       ),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(title, style: t.titleLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.w900)),
-        const SizedBox(height: 6),
-        Text(subtitle, style: t.bodyMedium?.copyWith(color: Colors.white70)),
-        const SizedBox(height: 12),
-        FilledButton.tonal(
-          style: FilledButton.styleFrom(
-            backgroundColor: Colors.white,
-            foregroundColor: const Color(0xFF3F3D56),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: t.titleLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.w900)),
+          const SizedBox(height: 6),
+          Text(subtitle, style: t.bodyMedium?.copyWith(color: Colors.white70)),
+          const SizedBox(height: 12),
+          FilledButton.tonal(
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: const Color(0xFF3F3D56),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            ),
+            onPressed: onTap,
+            child: Text(tr('home.cta.button')), // ⬅️ i18n
           ),
-          onPressed: onTap,
-          child: const Text("Başlayalım"),
-        ),
-      ]),
+        ],
+      ),
     );
   }
 }

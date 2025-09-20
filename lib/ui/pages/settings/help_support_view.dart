@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class HelpSupportView extends StatelessWidget {
   const HelpSupportView({super.key});
@@ -6,16 +7,18 @@ class HelpSupportView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Yardım & Destek')),
+      appBar: AppBar(title: Text(tr('help.title'))),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           const Divider(),
           ListTile(
             leading: const Icon(Icons.email_rounded),
-            title: const Text('Bize Ulaşın'),
+            title: Text(tr('help.contact_us')),
             subtitle: const Text('mustafa.caglar147@gmail.com'),
-            onTap: () {},
+            onTap: () {
+              // Şimdilik boş kalsın (istersen ileride email launch ekleriz)
+            },
           ),
         ],
       ),

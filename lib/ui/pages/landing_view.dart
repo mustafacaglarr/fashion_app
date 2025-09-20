@@ -1,5 +1,6 @@
 import 'package:fashion_app/ui/pages/tryon_wizard_view.dart';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart'; // ⬅️ eklendi
 import '../style/app_colors.dart';
 import '../widgets/hero_section.dart';
 import '../widgets/stat_card.dart';
@@ -22,38 +23,59 @@ class LandingView extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
           children: [
             HeroSection(
-              onPrimaryCta: () {
-                // ✅ helper ile aç
-                TryOnWizardView.open(context);
-              },
+              onPrimaryCta: () => TryOnWizardView.open(context),
             ),
             const SizedBox(height: 16),
-            Row(children: const [
-              Expanded(child: StatCard(icon: Icons.groups_rounded, number: "10K+", label: "Aktif Kullanıcı")),
-              SizedBox(width: 10),
-              Expanded(child: StatCard(icon: Icons.favorite_rounded, number: "700K+", label: "Denenen Kıyafet")),
-              SizedBox(width: 10),
-              Expanded(child: StatCard(icon: Icons.trending_up_rounded, number: "99%", label: "Memnuniyet")),
+            Row(children: [
+              Expanded(
+                child: StatCard(
+                  icon: Icons.groups_rounded,
+                  number: "10K+",
+                  label: tr('home.stats.active_users'),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: StatCard(
+                  icon: Icons.favorite_rounded,
+                  number: "700K+",
+                  label: tr('home.stats.outfits_tried'),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: StatCard(
+                  icon: Icons.trending_up_rounded,
+                  number: "99%",
+                  label: tr('home.stats.satisfaction'),
+                ),
+              ),
             ]),
             const SizedBox(height: 24),
-            Text("Neler Yapabilirsiniz?", style: t.titleLarge?.copyWith(fontWeight: FontWeight.w900)),
+            Text(
+              tr('home.sections.what_can_you_do'),
+              style: t.titleLarge?.copyWith(fontWeight: FontWeight.w900),
+            ),
             const SizedBox(height: 12),
             const FeatureGrid(),
             const SizedBox(height: 24),
-            Text("Nasıl Çalışır?", style: t.titleLarge?.copyWith(fontWeight: FontWeight.w900)),
+            Text(
+              tr('home.sections.how_it_works'),
+              style: t.titleLarge?.copyWith(fontWeight: FontWeight.w900),
+            ),
             const SizedBox(height: 12),
             const HowItWorks(),
             const SizedBox(height: 18),
             CtaBanner(
-              title: "Hemen Dene!",
-              subtitle: "İlk denemen ücretsiz. Kıyafetlerin sende nasıl duracağını gör.",
-              onTap: () => TryOnWizardView.open(context), // ✅ helper ile aç
+              title: tr('home.cta.title'),
+              subtitle: tr('home.cta.subtitle'),
+              onTap: () => TryOnWizardView.open(context),
             ),
           ],
         ),
       ),
       bottomNavigationBar: LandingBottomNav(
-        onTryNow: () => TryOnWizardView.open(context), // ✅ helper ile aç
+        onTryNow: () => TryOnWizardView.open(context),
       ),
     );
   }

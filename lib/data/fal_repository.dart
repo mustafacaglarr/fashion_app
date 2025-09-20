@@ -1,83 +1,68 @@
 // lib/data/fal_repository.dart
+import 'dart:convert';
 import 'dart:io';
-import 'package:fal_client/fal_client.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:cross_file/cross_file.dart';
-import 'package:http/http.dart' as http;
+import 'package:path/path.dart' as p;
+
 import 'tryon_models.dart';
 
 abstract class IFalRepository {
-  Future<String> uploadFile(XFile file);       // dönen URL
+  Future<String> uploadFile(XFile file); // Data URI
   Future<TryonResult> runTryOn(TryonRequest req);
 }
 
-class FalDirectRepository implements IFalRepository {
-  final String falKey;
-  late final FalClient _fal;
-
-  FalDirectRepository({required this.falKey}) {
-    _fal = FalClient.withCredentials(falKey);
-  }
+class FalFunctionsRepository implements IFalRepository {
+  final FirebaseFunctions _functions =
+      FirebaseFunctions.instanceFor(region: 'us-central1');
 
   @override
-  Future<String> uploadFile(XFile file) async {
-    // fal.storage.upload: dokümana göre XFile kabul eder ve URL döner
-    // (Dilerseniz Data URI de gönderebilirsiniz; büyük dosyada performans düşer) :contentReference[oaicite:7]{index=7}
-    final url = await _fal.storage.upload(file);
-    return url;
+  Future<String> uploadFile(XFile x) async {
+    final file = File(x.path);
+    if (!await file.exists()) {
+      throw Exception('File not found: ${x.path}');
+    }
+    final bytes = await file.readAsBytes();
+
+    final ext = p.extension(x.path).toLowerCase();
+    final mime = (ext == '.png')
+        ? 'image/png'
+        : (ext == '.jpg' || ext == '.jpeg')
+            ? 'image/jpeg'
+            : 'application/octet-stream';
+
+    final b64 = base64Encode(bytes);
+    return 'data:$mime;base64,$b64';
   }
 
   @override
   Future<TryonResult> runTryOn(TryonRequest req) async {
-    // Basit kullanım: subscribe => tamamlanana kadar bekler ve sonucu döner
-    // (Queue API ile submit/status/result da kullanılabilir) :contentReference[oaicite:8]{index=8}
-    final output = await _fal.subscribe("fal-ai/fashn/tryon/v1.6",
-        input: req.toFalInputJson(),
-        logs: false);
+    final callable = _functions.httpsCallable('tryOn');
+    final resp = await callable.call({
+      'model': req.modelImageUrlOrDataUri,
+      'garment': req.garmentImageUrlOrDataUri,
+      'category': req.category.name,
+      'mode': req.mode.name,
+      'garmentPhotoType': req.garmentPhotoType,
+    });
 
-    // Çıktıyı şemaya göre al
-    final data = output.data as Map<String, dynamic>?;
-    final images = (data?["images"] as List<dynamic>? ?? [])
-        .map((e) => TryonResultImage((e as Map<String, dynamic>)["url"] as String))
-        .toList();
-    return TryonResult(images);
-  }
-}
+    final map = (resp.data as Map?) ?? const {};
+    final list = (map['images'] as List?) ?? const [];
 
-/// ÜRETİM: Anahtarı gizlemek için kendi backend'inizi çağırın.
-/// POST /tryon { modelUrl, garmentUrl, ... } => { images: [{ url: ...}] }
-class FalProxyRepository implements IFalRepository {
-  final String baseUrl; // ör: https://your.api/tryon
-  FalProxyRepository(this.baseUrl);
-
-  @override
-  Future<String> uploadFile(XFile file) async {
-    final uri = Uri.parse("$baseUrl/upload");
-    final req = http.MultipartRequest("POST", uri);
-    req.files.add(await http.MultipartFile.fromPath("file", file.path,
-        filename: file.name));
-    final resp = await req.send();
-    final body = await resp.stream.bytesToString();
-    if (resp.statusCode >= 200 && resp.statusCode < 300) {
-      // beklenen: {url:"..."}
-      final url = RegExp(r'"url"\s*:\s*"([^"]+)"').firstMatch(body)?.group(1);
-      if (url == null) throw Exception("Upload yanıtı beklenmedik");
-      return url;
+    if (list.isEmpty) {
+      // Function içinde de log var; burada da kısa bir izleme yapalım.
+      throw FirebaseFunctionsException(
+        code: 'unavailable',
+        message: 'Provider returned no images (normalized empty)',
+        details: map,
+      );
     }
-    throw Exception("Upload hata: ${resp.statusCode}");
-  }
 
-  @override
-  Future<TryonResult> runTryOn(TryonRequest req) async {
-    final uri = Uri.parse("$baseUrl/tryon");
-    final resp = await http.post(uri,
-        headers: {"Content-Type": "application/json"},
-        body: req.toFalInputJson().toString().replaceAll("'", '"'));
-    if (resp.statusCode >= 200 && resp.statusCode < 300) {
-      final urls = RegExp(r'"url"\s*:\s*"([^"]+)"').allMatches(resp.body)
-          .map((m) => m.group(1)!)
-          .toList();
-      return TryonResult(urls.map((e) => TryonResultImage(e)).toList());
-    }
-    throw Exception("Try-on hata: ${resp.statusCode}");
+    final out = list.map((e) {
+      final url = (e is Map) ? (e['url'] ?? e['image'] ?? '') : e.toString();
+      return TryonResultImage(url.toString());
+    }).toList();
+
+    return TryonResult(out);
   }
 }

@@ -1,10 +1,13 @@
+import 'package:fashion_app/app_keys.dart';
 import 'package:fashion_app/ui/pages/processing_view.dart';
+import 'package:fashion_app/ui/pages/settings/plan_view.dart';
 import 'package:fashion_app/ui/viewmodels/tryon_viewmodel.dart';
 import 'package:fashion_app/ui/widgets/filled_button_loading.dart';
 import 'package:fashion_app/ui/widgets/image_pick_card.dart';
 import 'package:fashion_app/ui/widgets/step_header.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:easy_localization/easy_localization.dart'; // ⬅️ i18n
 import '../../../data/tryon_models.dart';
 
 class TryOnWizardView extends StatefulWidget {
@@ -12,7 +15,6 @@ class TryOnWizardView extends StatefulWidget {
 
   /// İstersen hep bunu çağır: yeni route + anında reset.
   static Future<void> open(BuildContext context) async {
-    // yeni route'tan önce temizlik
     context.read<TryonViewModel>().reset();
     await Navigator.push(
       context,
@@ -28,11 +30,15 @@ class _TryOnWizardViewState extends State<TryOnWizardView> {
   @override
   void initState() {
     super.initState();
-    // Bu sayfa HER oluşturulduğunda baştan başlat.
-    // microtask -> Provider bağlandıktan hemen sonra çalışır.
     Future.microtask(() {
       if (mounted) context.read<TryonViewModel>().reset();
     });
+  }
+
+  // ⬇️ Eksik çeviri durumunda enum adı/ham değerle geri dön.
+  String _trOr(String key, String fallback) {
+    final v = tr(key);
+    return (v == key) ? fallback : v;
   }
 
   @override
@@ -40,6 +46,10 @@ class _TryOnWizardViewState extends State<TryOnWizardView> {
     return Consumer<TryonViewModel>(
       builder: (context, vm, _) {
         final theme = Theme.of(context);
+
+        String catLabel(GarmentCategory c) => _trOr('tryon.category.${c.name}', c.name);
+        String modeLabel(TryonMode m) => _trOr('tryon.mode.${m.name}', m.name);
+        String photoTypeLabel(String v) => _trOr('tryon.photoType.$v', v);
 
         Widget actionsBar({
           required bool showBack,
@@ -49,24 +59,50 @@ class _TryOnWizardViewState extends State<TryOnWizardView> {
           return Row(
             children: [
               if (showBack)
-                OutlinedButton(onPressed: vm.goBack, child: const Text("Geri")),
+                OutlinedButton(
+                  onPressed: vm.goBack,
+                  child: Text(tr('tryon.actions.back')),
+                ),
               if (showBack) const SizedBox(width: 12),
               if (showNext)
-                FilledButton(onPressed: vm.goNext, child: const Text("İleri")),
+                FilledButton(
+                  onPressed: vm.goNext,
+                  child: Text(tr('tryon.actions.next')),
+                ),
               if (showSubmit)
+                // TryOnWizardView -> actionsBar(showSubmit: true) bölümünde
                 FilledButtonLoading(
                   loading: vm.state == TryonState.uploading || vm.state == TryonState.processing,
-                  onPressed: vm.canSubmitFromConfirm
-                      ? () {
-                          // Burada RESET YOK. Sadece processing’e git.
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (_) => const ProcessingView()),
-                          );
-                        }
-                      : null,
-                  child: const Text("Dene"),
+                  // actionsBar içindeki onPressed
+onPressed: vm.canSubmitFromConfirm ? () async {
+  final qr = await vm.submitWithQuota(); // ⬅️ context parametresi yok
+
+  if (qr != null && !qr.allowed) {
+    final msgKey = switch (qr.code) {
+      'free_daily_exceeded'   => 'tryon.quota.errors.free_daily_exceeded',
+      'paid_monthly_exceeded' => 'tryon.quota.errors.paid_monthly_exceeded',
+      'no_session'            => 'tryon.quota.errors.no_session',
+      _                       => 'tryon.quota.errors.generic',
+    };
+    rootMessengerKey.currentState?.showSnackBar(SnackBar(content: Text(tr(msgKey))));
+
+    if (qr.plan == 'free') {
+      appNavigatorKey.currentState?.pushNamed('/profile'); // veya plan ekranınız
+    }
+    return;
+  }
+
+  // izin verildiyse ProcessingView’a geç
+  appNavigatorKey.currentState?.push(
+    MaterialPageRoute(builder: (_) => const ProcessingView()),
+  );
+} : null,
+
+
+
+                  child: Text(tr('tryon.actions.try')),
                 ),
+
             ],
           );
         }
@@ -79,14 +115,14 @@ class _TryOnWizardViewState extends State<TryOnWizardView> {
                 children: [
                   const SizedBox(height: 12),
                   ImagePickCard(
-                    title: "Model Fotoğrafı",
-                    subtitle: "Yüz & gövde net, sade arka plan",
+                    title: tr('tryon.model.title'),
+                    subtitle: tr('tryon.model.subtitle'),
                     onTap: vm.pickModelPhoto,
                     path: vm.modelPhoto?.path,
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    "İpucu: Tek kişi, iyi ışık, sade arka plan en iyi sonucu verir.",
+                    tr('tryon.model.tip'),
                     style: theme.textTheme.bodyMedium?.copyWith(color: Colors.black54),
                   ),
                   const SizedBox(height: 20),
@@ -100,14 +136,14 @@ class _TryOnWizardViewState extends State<TryOnWizardView> {
                 children: [
                   const SizedBox(height: 12),
                   ImagePickCard(
-                    title: "Kıyafet Görseli",
-                    subtitle: "Flat-lay / manken üstünde net çekim",
+                    title: tr('tryon.garment.title'),
+                    subtitle: tr('tryon.garment.subtitle'),
                     onTap: vm.pickGarmentPhoto,
                     path: vm.garmentPhoto?.path,
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    "İpucu: Flat-lay ya da net manken fotoğrafı daha iyi sonuç verir.",
+                    tr('tryon.garment.tip'),
                     style: theme.textTheme.bodyMedium?.copyWith(color: Colors.black54),
                   ),
                   const SizedBox(height: 20),
@@ -126,18 +162,18 @@ class _TryOnWizardViewState extends State<TryOnWizardView> {
                     child: Column(
                       children: [
                         Row(children: [
-                          Expanded(child: Text("Kategori", style: theme.textTheme.bodyMedium)),
-                          Text(vm.category.name, style: theme.textTheme.titleMedium),
+                          Expanded(child: Text(tr('tryon.confirm.summary.category'), style: theme.textTheme.bodyMedium)),
+                          Text(catLabel(vm.category), style: theme.textTheme.titleMedium),
                         ]),
                         const Divider(height: 22),
                         Row(children: [
-                          Expanded(child: Text("Mod", style: theme.textTheme.bodyMedium)),
-                          Text(vm.mode.name, style: theme.textTheme.titleMedium),
+                          Expanded(child: Text(tr('tryon.confirm.summary.mode'), style: theme.textTheme.bodyMedium)),
+                          Text(modeLabel(vm.mode), style: theme.textTheme.titleMedium),
                         ]),
                         const Divider(height: 22),
                         Row(children: [
-                          Expanded(child: Text("Kıyafet Foto Tipi", style: theme.textTheme.bodyMedium)),
-                          Text(vm.garmentPhotoType, style: theme.textTheme.titleMedium),
+                          Expanded(child: Text(tr('tryon.confirm.summary.photo_type'), style: theme.textTheme.bodyMedium)),
+                          Text(photoTypeLabel(vm.garmentPhotoType), style: theme.textTheme.titleMedium),
                         ]),
                       ],
                     ),
@@ -147,9 +183,9 @@ class _TryOnWizardViewState extends State<TryOnWizardView> {
                     Expanded(
                       child: DropdownButtonFormField<GarmentCategory>(
                         value: vm.category,
-                        decoration: const InputDecoration(labelText: "Kategori"),
+                        decoration: InputDecoration(labelText: tr('tryon.confirm.summary.category')),
                         items: GarmentCategory.values
-                            .map((c) => DropdownMenuItem(value: c, child: Text(c.name)))
+                            .map((c) => DropdownMenuItem(value: c, child: Text(catLabel(c))))
                             .toList(),
                         onChanged: (v) => vm.setCategory(v ?? GarmentCategory.auto),
                       ),
@@ -158,9 +194,9 @@ class _TryOnWizardViewState extends State<TryOnWizardView> {
                     Expanded(
                       child: DropdownButtonFormField<TryonMode>(
                         value: vm.mode,
-                        decoration: const InputDecoration(labelText: "Mod"),
+                        decoration: InputDecoration(labelText: tr('tryon.confirm.summary.mode')),
                         items: TryonMode.values
-                            .map((m) => DropdownMenuItem(value: m, child: Text(m.name)))
+                            .map((m) => DropdownMenuItem(value: m, child: Text(modeLabel(m))))
                             .toList(),
                         onChanged: (v) => vm.setMode(v ?? TryonMode.balanced),
                       ),
@@ -169,13 +205,11 @@ class _TryOnWizardViewState extends State<TryOnWizardView> {
                   const SizedBox(height: 12),
                   DropdownButtonFormField<String>(
                     value: vm.garmentPhotoType,
-                    decoration: const InputDecoration(labelText: "Kıyafet Foto Tipi"),
-                    items: const [
-                      DropdownMenuItem(value: "auto", child: Text("auto")),
-                      DropdownMenuItem(value: "model", child: Text("model")),
-                      DropdownMenuItem(value: "flat-lay", child: Text("flat-lay")),
-                    ],
-                    onChanged: (v) => vm.setGarmentPhotoType(v ?? "auto"),
+                    decoration: InputDecoration(labelText: tr('tryon.confirm.summary.photo_type')),
+                    items: const ['auto', 'model', 'flat-lay']
+                        .map((v) => DropdownMenuItem(value: v, child: Text(photoTypeLabel(v))))
+                        .toList(),
+                    onChanged: (v) => vm.setGarmentPhotoType(v ?? 'auto'),
                   ),
                   const SizedBox(height: 20),
                   actionsBar(showBack: true, showNext: false, showSubmit: true),
@@ -187,7 +221,7 @@ class _TryOnWizardViewState extends State<TryOnWizardView> {
         int stepIndex(TryonStep s) => s == TryonStep.model ? 0 : s == TryonStep.garment ? 1 : 2;
 
         return Scaffold(
-          appBar: AppBar(title: const Text("VTON — Sanal Deneme")),
+          appBar: AppBar(title: Text(tr('tryon.appbar_title'))),
           body: SafeArea(
             child: ListView(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),

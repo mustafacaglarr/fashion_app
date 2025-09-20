@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../../../services/auth_service.dart';
 import '../../../services/local_avatar_service.dart';
@@ -52,44 +53,43 @@ class _DeleteAccountWizardViewState extends State<DeleteAccountWizardView> {
     });
   }
 
-String _mapFirebaseErrorToTr(String code) {
-  switch (code) {
-    case 'user-not-found':
-      return 'Böyle bir kullanıcı bulunamadı.';
-    case 'wrong-password':
-      return 'Şifre hatalı. Lütfen tekrar deneyin.';
-    case 'invalid-email':
-      return 'Geçersiz e-posta adresi.';
-    case 'missing-credentials':
-      return 'E-posta ve şifre gerekli.';
-    case 'user-disabled':
-      return 'Bu hesap devre dışı bırakılmış.';
-    case 'too-many-requests':
-      return 'Çok fazla deneme yapıldı. Lütfen daha sonra tekrar deneyin.';
-    default:
-      return 'Kimlik doğrulama başarısız. (${code})';
-  }
-}
-
-
- Future<void> _tryReauthEmail() async {
-  setState(() { _busy = true; _error = null; });
-  try {
-    if (_email.text.trim().isEmpty || _password.text.isEmpty) {
-      throw FirebaseAuthException(code: 'missing-credentials', message: 'E-posta ve şifre gerekli');
+  // Firebase hata kodlarını çeviri anahtarlarına map’le
+  String _mapFirebaseError(String code) {
+    switch (code) {
+      case 'user-not-found':
+        return tr('delete.errors.codes.user_not_found');
+      case 'wrong-password':
+        return tr('delete.errors.codes.wrong_password');
+      case 'invalid-email':
+        return tr('delete.errors.codes.invalid_email');
+      case 'missing-credentials':
+        return tr('delete.errors.codes.missing_credentials');
+      case 'user-disabled':
+        return tr('delete.errors.codes.user_disabled');
+      case 'too-many-requests':
+        return tr('delete.errors.codes.too_many_requests');
+      default:
+        return tr('delete.errors.codes.auth_failed', namedArgs: {'code': code});
     }
-    await AuthService().reauthWithEmailPassword(_email.text.trim(), _password.text);
-    setState(() => _reauthenticated = true);
-    _goNext();
-  } on FirebaseAuthException catch (e) {
-    setState(() => _error = _mapFirebaseErrorToTr(e.code));
-  } catch (e) {
-    setState(() => _error = 'Bir hata oluştu: $e');
-  } finally {
-    if (mounted) setState(() => _busy = false);
   }
-}
 
+  Future<void> _tryReauthEmail() async {
+    setState(() { _busy = true; _error = null; });
+    try {
+      if (_email.text.trim().isEmpty || _password.text.isEmpty) {
+        throw FirebaseAuthException(code: 'missing-credentials', message: tr('delete.errors.missing_credentials'));
+      }
+      await AuthService().reauthWithEmailPassword(_email.text.trim(), _password.text);
+      setState(() => _reauthenticated = true);
+      _goNext();
+    } on FirebaseAuthException catch (e) {
+      setState(() => _error = _mapFirebaseError(e.code));
+    } catch (e) {
+      setState(() => _error = tr('errors.unexpected_with_detail', namedArgs: {'error': e.toString()}));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
 
   Future<void> _tryReauthGoogle() async {
     setState(() { _busy = true; _error = null; });
@@ -98,22 +98,23 @@ String _mapFirebaseErrorToTr(String code) {
       setState(() => _reauthenticated = true);
       _goNext();
     } on FirebaseAuthException catch (e) {
-      setState(() => _error = e.message ?? 'Google doğrulaması başarısız.');
+      setState(() => _error = e.message ?? tr('delete.errors.google_failed'));
     } catch (e) {
-      setState(() => _error = 'Bir hata oluştu: $e');
+      setState(() => _error = tr('errors.unexpected_with_detail', namedArgs: {'error': e.toString()}));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
   }
 
   Future<void> _performDelete() async {
-    if (_confirm.text.trim().toUpperCase() != 'SİL') {
-      setState(() => _error = 'Devam etmek için kutuya SİL yazın.');
+    final requiredWord = tr('delete.wizard.confirm_word').toUpperCase();
+    if (_confirm.text.trim().toUpperCase() != requiredWord) {
+      setState(() => _error = tr('delete.wizard.confirm_mismatch', namedArgs: {'word': requiredWord}));
       return;
     }
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      setState(() => _error = 'Oturum bulunamadı.');
+      setState(() => _error = tr('delete.errors.session_missing'));
       return;
     }
 
@@ -132,8 +133,8 @@ String _mapFirebaseErrorToTr(String code) {
         context: context,
         barrierDismissible: false,
         builder: (_) => AlertDialog(
-          title: const Text('Hesap Silindi'),
-          content: const Text('Hesabın ve verilerin kalıcı olarak kaldırıldı.'),
+          title: Text(tr('delete.dialog.title')),
+          content: Text(tr('delete.dialog.content')),
           actions: [
             FilledButton(
               onPressed: () {
@@ -142,16 +143,15 @@ String _mapFirebaseErrorToTr(String code) {
                   (_) => false,
                 );
               },
-              child: const Text('Tamam'),
+              child: Text(tr('common.ok')),
             ),
           ],
         ),
       );
     } on FirebaseAuthException catch (e) {
-      // requires-recent-login tipik hata: kullanıcı step 2’yi atlamış olabilir
-      setState(() => _error = e.message ?? 'Silme işlemi başarısız (yeniden giriş gerekli olabilir).');
+      setState(() => _error = e.message ?? tr('delete.errors.needs_recent_login'));
     } catch (e) {
-      setState(() => _error = 'Silme işlemi başarısız: $e');
+      setState(() => _error = tr('delete.errors.delete_failed', namedArgs: {'error': e.toString()}));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -162,7 +162,7 @@ String _mapFirebaseErrorToTr(String code) {
     final t = Theme.of(context).textTheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Hesabı Sil')),
+      appBar: AppBar(title: Text(tr('delete.title'))),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
@@ -199,7 +199,7 @@ String _mapFirebaseErrorToTr(String code) {
                 children: [
                   const Icon(Icons.verified_user_rounded, color: Colors.green),
                   const SizedBox(width: 8),
-                  Text('Kimlik doğrulandı', style: t.bodyMedium?.copyWith(color: Colors.green)),
+                  Text(tr('delete.wizard.verified'), style: t.bodyMedium?.copyWith(color: Colors.green)),
                 ],
               ),
             ],
@@ -217,7 +217,11 @@ class _WizardHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final titles = const ['Uyarı', 'Kimlik Doğrulama', 'Son Onay'];
+    final titles = [
+      tr('delete.steps.warning'),
+      tr('delete.steps.reauth'),
+      tr('delete.steps.confirm'),
+    ];
     final idx = step == _DelStep.intro ? 0 : step == _DelStep.reauth ? 1 : 2;
 
     return Column(
@@ -283,7 +287,7 @@ class _IntroStep extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  "Bu işlem kalıcıdır. Hesap bilgilerin, geçmiş görsellerin ve yerel profil avatarın silinecek.",
+                  tr('delete.wizard.warning_text'),
                   style: t.bodyMedium?.copyWith(color: Colors.red.shade700),
                 ),
               ),
@@ -297,12 +301,11 @@ class _IntroStep extends StatelessWidget {
             foregroundColor: Colors.white,
           ),
           onPressed: onNext,
-          child: const Padding(
-            padding: EdgeInsets.symmetric(vertical: 12),
-            child: Text('Devam Et'),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Text(tr('common.continue')),
           ),
         ),
-
       ],
     );
   }
@@ -334,184 +337,170 @@ class _ReauthStep extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-  // --- Başlık ---
-  Row(
-    children: [
-      Icon(Icons.verified_user_rounded, color: Colors.blue,),
-      const SizedBox(width: 8),
-      Text(
-        'Kimlik Doğrulama',
-        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w800,
-            ),
-      ),
-    ],
-  ),
-  const SizedBox(height: 12),
-
-  // --- Kart ---
-  Container(
-    padding: const EdgeInsets.all(14),
-    decoration: BoxDecoration(
-      color: Colors.grey.shade50,
-      borderRadius: BorderRadius.circular(16),
-      border: Border.all(color: Colors.grey.shade200),
-    ),
-    child: Column(
-      children: [
-        // Email
-        TextField(
-          controller: email,
-          keyboardType: TextInputType.emailAddress,
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: Colors.grey.shade100,
-            labelText: 'E-posta',
-            hintText: 'ornek@mail.com',
-            prefixIcon: const Icon(Icons.email_outlined),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide(color: Colors.grey.shade300),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide(color: Colors.grey.shade300),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide(color: Colors.grey.shade500, width: 1.2),
-            ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-          ),
-        ),
-        const SizedBox(height: 12),
-
-        // Şifre
-        TextField(
-          controller: password,
-          obscureText: !showPass,
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: Colors.grey.shade100,
-            labelText: 'Şifre',
-            prefixIcon: const Icon(Icons.lock_outline),
-            suffixIcon: IconButton(
-              onPressed: onTogglePass,
-              icon: Icon(showPass ? Icons.visibility_off : Icons.visibility),
-              tooltip: showPass ? 'Şifreyi gizle' : 'Şifreyi göster',
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide(color: Colors.grey.shade300),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide(color: Colors.grey.shade300),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide(color: Colors.grey.shade500, width: 1.2),
-            ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-          ),
-        ),
-
-        const SizedBox(height: 14),
-        // İnce ayraç
-        Divider(color: Colors.grey.shade300, height: 1),
-
-        const SizedBox(height: 12),
-
-        // E-posta ile doğrula
-        SizedBox(
-          width: double.infinity,
-          child: FilledButton.tonalIcon(
-            style: FilledButton.styleFrom(
-              backgroundColor: Colors.grey.shade200,
-              foregroundColor: Colors.grey.shade800, // label rengi
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            ),
-            onPressed: busy ? null : onEmailReauth,
-            icon: const Icon(
-              Icons.verified_user_rounded,
-              color: Colors.blue, // sadece ikon mavi
-            ),
-            label: const Text('E-posta ile Doğrula'),
-          ),
-        ),
-
-
-        const SizedBox(height: 10),
-
-        // "veya" ayırıcı
+        // --- Başlık ---
         Row(
           children: [
-            Expanded(child: Divider(color: Colors.grey.shade300)),
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 8),
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(999),
-                border: Border.all(color: Colors.grey.shade300),
-              ),
-              child: Text(
-                'veya',
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(color: Colors.grey.shade700),
-              ),
+            const Icon(Icons.verified_user_rounded, color: Colors.blue),
+            const SizedBox(width: 8),
+            Text(
+              tr('delete.steps.reauth_title'),
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
             ),
-            Expanded(child: Divider(color: Colors.grey.shade300)),
           ],
         ),
+        const SizedBox(height: 12),
 
-        const SizedBox(height: 10),
+        // --- Kart ---
+        Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade50,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.grey.shade200),
+          ),
+          child: Column(
+            children: [
+              // Email
+              TextField(
+                controller: email,
+                keyboardType: TextInputType.emailAddress,
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.grey.shade100,
+                  labelText: tr('auth.email'),
+                  hintText: tr('delete.inputs.email_hint'),
+                  prefixIcon: const Icon(Icons.email_outlined),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide(color: Colors.grey.shade300),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide(color: Colors.grey.shade300),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide(color: Colors.grey.shade500, width: 1.2),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                ),
+              ),
+              const SizedBox(height: 12),
 
-        // Google ile doğrula
-        SizedBox(
-          width: double.infinity,
-          child: OutlinedButton.icon(
-            style: OutlinedButton.styleFrom(
-              foregroundColor: Colors.grey.shade800,
-              side: BorderSide(color: Colors.grey.shade300),
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            ),
-            onPressed: busy ? null : onGoogleReauth,
-            icon: Image.asset(
-              'assets/google.png',
-              height: 20,
-              width: 20,
-            ),
-            label: const Text('Google ile Doğrula'),
+              // Şifre
+              TextField(
+                controller: password,
+                obscureText: !showPass,
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.grey.shade100,
+                  labelText: tr('auth.password'),
+                  prefixIcon: const Icon(Icons.lock_outline),
+                  suffixIcon: IconButton(
+                    onPressed: onTogglePass,
+                    icon: Icon(showPass ? Icons.visibility_off : Icons.visibility),
+                    tooltip: showPass ? tr('delete.inputs.hide_password') : tr('delete.inputs.show_password'),
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide(color: Colors.grey.shade300),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide(color: Colors.grey.shade300),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide(color: Colors.grey.shade500, width: 1.2),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                ),
+              ),
+
+              const SizedBox(height: 14),
+              Divider(color: Colors.grey.shade300, height: 1),
+              const SizedBox(height: 12),
+
+              // E-posta ile doğrula
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.tonalIcon(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Colors.grey.shade200,
+                    foregroundColor: Colors.grey.shade800,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  onPressed: busy ? null : onEmailReauth,
+                  icon: const Icon(Icons.verified_user_rounded, color: Colors.blue),
+                  label: Text(tr('delete.actions.reauth_email')),
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              // "veya" ayırıcı
+              Row(
+                children: [
+                  Expanded(child: Divider(color: Colors.grey.shade300)),
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(color: Colors.grey.shade300),
+                    ),
+                    child: Text(
+                      tr('auth.or'),
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(color: Colors.grey.shade700),
+                    ),
+                  ),
+                  Expanded(child: Divider(color: Colors.grey.shade300)),
+                ],
+              ),
+
+              const SizedBox(height: 10),
+
+              // Google ile doğrula
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.grey.shade800,
+                    side: BorderSide(color: Colors.grey.shade300),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  onPressed: busy ? null : onGoogleReauth,
+                  icon: Image.asset('assets/google.png', height: 20, width: 20),
+                  label: Text(tr('delete.actions.reauth_google')),
+                ),
+              ),
+            ],
           ),
         ),
 
+        const SizedBox(height: 16),
+
+        // Alt aksiyonlar
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.grey.shade800,
+                  side: BorderSide(color: Colors.grey.shade300),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                onPressed: busy ? null : onBack,
+                child: Text(tr('common.back')),
+              ),
+            ),
+          ],
+        ),
       ],
-    ),
-  ),
-
-  const SizedBox(height: 16),
-
-  // Alt aksiyonlar
-  Row(
-    children: [
-      Expanded(
-        child: OutlinedButton(
-          style: OutlinedButton.styleFrom(
-            foregroundColor: Colors.grey.shade800,
-            side: BorderSide(color: Colors.grey.shade300),
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          ),
-          onPressed: busy ? null : onBack,
-          child: const Text('Geri'),
-        ),
-      ),
-    ],
-  ),
-]
-
     );
   }
 }
@@ -533,78 +522,74 @@ class _ConfirmStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = Theme.of(context).textTheme;
+    final requiredWord = tr('delete.wizard.confirm_word');
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text("Devam etmek için aşağıdaki kutuya büyük harflerle SİL yaz.", style: t.bodyMedium),
+        Text(tr('delete.wizard.confirm_instruction', namedArgs: {'word': requiredWord}), style: t.bodyMedium),
         const SizedBox(height: 10),
         TextField(
           controller: confirmCtrl,
           textCapitalization: TextCapitalization.characters,
-          decoration: const InputDecoration(
-            labelText: "SİL yaz",
-            prefixIcon: Icon(Icons.delete_forever_rounded, color: Colors.red),
+          decoration: InputDecoration(
+            labelText: tr('delete.wizard.confirm_label', namedArgs: {'word': requiredWord}),
+            prefixIcon: const Icon(Icons.delete_forever_rounded, color: Colors.red),
           ),
         ),
         const SizedBox(height: 16),
-       Row(
-  children: [
-    // Geri (nötr)
-    Expanded(
-      child: OutlinedButton.icon(
-        style: OutlinedButton.styleFrom(
-          foregroundColor: Colors.grey.shade800,
-          side: BorderSide(color: Colors.grey.shade300),
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-        ),
-        onPressed: busy ? null : onBack,
-        icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
-        label: const Text(
-          'Geri',
-          style: TextStyle(fontWeight: FontWeight.w600),
-        ),
-      ),
-    ),
-    const SizedBox(width: 12),
-
-    // Sil (destructive)
-    Expanded(
-      child: FilledButton.icon(
-        style: FilledButton.styleFrom(
-          backgroundColor: Colors.red.shade700,
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-        ),
-        onPressed: busy ? null : onDelete,
-        icon: const Icon(Icons.delete_forever_rounded),
-        label: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 200),
-          transitionBuilder: (child, anim) =>
-              FadeTransition(opacity: anim, child: child),
-          child: busy
-              ? const SizedBox(
-                  key: ValueKey('prog'),
-                  height: 20,
-                  width: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Colors.white,
-                  ),
-                )
-              : const Text(
-                  'Kalıcı Olarak Sil',
-                  key: ValueKey('text'),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontWeight: FontWeight.w700),
+        Row(
+          children: [
+            // Back
+            Expanded(
+              child: OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.grey.shade800,
+                  side: BorderSide(color: Colors.grey.shade300),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 ),
-        ),
-      ),
-    ),
-  ],
-)
+                onPressed: busy ? null : onBack,
+                icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
+                label: Text(tr('common.back'), style: const TextStyle(fontWeight: FontWeight.w600)),
+              ),
+            ),
+            const SizedBox(width: 12),
+
+            // Delete (destructive)
+           // Delete (destructive)
+            Expanded(
+              child: FilledButton.icon(
+                style: FilledButton.styleFrom(
+                  backgroundColor: Colors.red.shade700,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                ),
+                onPressed: busy ? null : onDelete,
+                icon: const Icon(Icons.delete_forever_rounded),
+                label: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 200),
+                  transitionBuilder: (child, anim) => FadeTransition(opacity: anim, child: child),
+                  child: busy
+                      ? const SizedBox(
+                          key: ValueKey('prog'),
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                        )
+                      : Text(
+                          tr('delete.actions.delete_permanently'),
+                          key: const ValueKey('text'),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontWeight: FontWeight.w700),
+                        ),
+                ),
+              ),
+            )
+              ],
+            )
 
       ],
     );

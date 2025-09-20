@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart'; // ⬅️ eklendi
 import 'feature_tile.dart';
 import '../style/app_colors.dart';
 
@@ -13,30 +14,30 @@ class FeatureGrid extends StatelessWidget {
       mainAxisSpacing: 12,
       crossAxisSpacing: 12,
       physics: const NeverScrollableScrollPhysics(),
-      children: const [
+      children: [
         FeatureTile(
-          title: "Anında Dene",
-          subtitle: "Fotoğrafını çek, kıyafeti seç ve sonucu gör",
+          title: tr('home.features.instant.title'),
+          subtitle: tr('home.features.instant.subtitle'),
           icon: Icons.flash_on_rounded,
           start: AppColors.g1, end: AppColors.g2,
         ),
         FeatureTile(
-          title: "Geçmişini İncele",
-          subtitle: "Daha önce denediklerine tekrar göz at",
+          title: tr('home.features.history.title'),
+          subtitle: tr('home.features.history.subtitle'),
           icon: Icons.history_rounded,
-          start: Color(0xFFFF8A65), end: Color(0xFFFF7043),
+          start: const Color(0xFFFF8A65), end: const Color(0xFFFF7043),
         ),
         FeatureTile(
-          title: "Favorilerin",
-          subtitle: "Beğendiğin kombinleri kaydet",
+          title: tr('home.features.favorites.title'),
+          subtitle: tr('home.features.favorites.subtitle'),
           icon: Icons.star_rounded,
-          start: Color(0xFF34D399), end: Color(0xFF06B6D4),
+          start: const Color(0xFF34D399), end: const Color(0xFF06B6D4),
         ),
         FeatureTile(
-          title: "Hızlı Sonuç",
-          subtitle: "3 saniyede AI ile gerçekçi sonuç",
+          title: tr('home.features.fast.title'),
+          subtitle: tr('home.features.fast.subtitle'),
           icon: Icons.speed_rounded,
-          start: Color(0xFFFFC371), end: Color(0xFFFF5F6D),
+          start: const Color(0xFFFFC371), end: const Color(0xFFFF5F6D),
         ),
       ],
     );

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';           // ⬅️ eklendi
 import 'package:fashion_app/ui/pages/profile_view.dart';
 import 'package:fashion_app/ui/pages/history_view.dart';
 
@@ -37,30 +38,27 @@ class _LandingBottomNavState extends State<LandingBottomNav> {
         setState(() => _index = i);
 
         switch (i) {
-          case 0: // Ana Sayfa
+          case 0: // Home
             if (Navigator.canPop(context)) {
               Navigator.popUntil(context, (route) => route.isFirst);
             }
             break;
-
-          case 1: // Dene
+          case 1: // Try
             widget.onTryNow();
             break;
-
-          case 2: // Geçmiş
+          case 2: // History
             await _BottomNavRoutes.toHistory(context);
             break;
-
-          case 3: // Profil
+          case 3: // Profile
             await _BottomNavRoutes.toProfile(context);
             break;
         }
       },
-      destinations: const [
-        NavigationDestination(icon: Icon(Icons.home_rounded), label: "Ana Sayfa"),
-        NavigationDestination(icon: Icon(Icons.camera_rounded), label: "Dene"),
-        NavigationDestination(icon: Icon(Icons.history_rounded), label: "Geçmiş"),
-        NavigationDestination(icon: Icon(Icons.person_rounded), label: "Profil"),
+      destinations: [
+        NavigationDestination(icon: const Icon(Icons.home_rounded),    label: tr('nav.home')),
+        NavigationDestination(icon: const Icon(Icons.camera_rounded),  label: tr('nav.try')),
+        NavigationDestination(icon: const Icon(Icons.history_rounded), label: tr('nav.history')),
+        NavigationDestination(icon: const Icon(Icons.person_rounded),  label: tr('nav.profile')),
       ],
     );
   }

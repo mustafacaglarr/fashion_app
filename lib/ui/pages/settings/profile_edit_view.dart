@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart'; // ⬅️ eklendi
 
 class ProfileEditView extends StatefulWidget {
   final String currentName;
@@ -43,7 +44,8 @@ class _ProfileEditViewState extends State<ProfileEditView> {
       if (mounted) Navigator.pop(context);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Kaydedilemedi: $e')));
+      final msg = tr('profile.edit.save_failed_with_error', namedArgs: {'error': e.toString()});
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -52,7 +54,7 @@ class _ProfileEditViewState extends State<ProfileEditView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Profil Bilgileri')),
+      appBar: AppBar(title: Text(tr('profile.edit.title'))),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -62,15 +64,15 @@ class _ProfileEditViewState extends State<ProfileEditView> {
               children: [
                 TextFormField(
                   controller: _name,
-                  decoration: const InputDecoration(labelText: 'Ad Soyad'),
-                  validator: (v) => (v == null || v.length < 2) ? 'Adınızı girin' : null,
+                  decoration: InputDecoration(labelText: tr('auth.full_name')),
+                  validator: (v) => (v == null || v.trim().length < 2) ? tr('errors.name_required') : null,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _email,
-                  decoration: const InputDecoration(labelText: 'E-posta'),
+                  decoration: InputDecoration(labelText: tr('auth.email')),
                   keyboardType: TextInputType.emailAddress,
-                  validator: (v) => (v == null || !v.contains('@')) ? 'Geçerli e-posta' : null,
+                  validator: (v) => (v == null || !v.contains('@')) ? tr('errors.email_invalid') : null,
                 ),
                 const SizedBox(height: 20),
                 SizedBox(
@@ -78,8 +80,11 @@ class _ProfileEditViewState extends State<ProfileEditView> {
                   child: FilledButton(
                     onPressed: _busy ? null : _save,
                     child: _busy
-                        ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                        : const Text('Kaydet'),
+                        ? const SizedBox(
+                            height: 20, width: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                          )
+                        : Text(tr('common.save')),
                   ),
                 ),
               ],

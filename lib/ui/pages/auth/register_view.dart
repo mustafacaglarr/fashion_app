@@ -1,6 +1,7 @@
 // lib/ui/pages/auth/register_view.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../../../services/auth_service.dart'; // Plan.basic için
 import '../../viewmodels/auth_viewmodel.dart';
@@ -19,7 +20,7 @@ class _RegisterViewState extends State<RegisterView> {
   final _password = TextEditingController();
   bool _obscure = true;
 
-  String? _error; // 🔴 hata mesajı burada tutulacak
+  String? _error; // hata mesajı
 
   @override
   void dispose() {
@@ -35,24 +36,22 @@ class _RegisterViewState extends State<RegisterView> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Kayıt Ol')),
+      appBar: AppBar(title: Text(tr('auth.register_title'))),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
             Text(
-              'Aramıza katıl! 🚀',
+              tr('auth.join_us'),
               style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900),
             ),
             const SizedBox(height: 6),
             Text(
-              'E-posta ve şifre ile ücretsiz hesabını oluştur. '
-              'İstersen daha sonra Pro/Expert plana yükseltebilirsin.',
+              tr('auth.register_subtitle'),
               style: theme.textTheme.bodyMedium,
             ),
             const SizedBox(height: 18),
 
-            // 🔴 Hata mesajı kutusu
             if (_error != null) ...[
               Container(
                 padding: const EdgeInsets.all(12),
@@ -86,22 +85,25 @@ class _RegisterViewState extends State<RegisterView> {
                 children: [
                   TextFormField(
                     controller: _name,
-                    decoration: const InputDecoration(
-                      labelText: 'Ad Soyad',
-                      prefixIcon: Icon(Icons.person_outline),
+                    decoration: InputDecoration(
+                      labelText: tr('auth.full_name'),
+                      prefixIcon: const Icon(Icons.person_outline),
                     ),
-                    validator: (v) => (v == null || v.trim().length < 2) ? 'Adınızı girin' : null,
+                    validator: (v) => (v == null || v.trim().length < 2)
+                        ? tr('errors.name_required')
+                        : null,
                   ),
                   const SizedBox(height: 12),
 
                   TextFormField(
                     controller: _email,
-                    decoration: const InputDecoration(
-                      labelText: 'E-posta',
-                      prefixIcon: Icon(Icons.email_outlined),
+                    decoration: InputDecoration(
+                      labelText: tr('auth.email'),
+                      prefixIcon: const Icon(Icons.email_outlined),
                     ),
                     keyboardType: TextInputType.emailAddress,
-                    validator: (v) => (v == null || !v.contains('@')) ? 'Geçerli bir e-posta' : null,
+                    validator: (v) =>
+                        (v == null || !v.contains('@')) ? tr('errors.email_invalid') : null,
                   ),
                   const SizedBox(height: 12),
 
@@ -109,14 +111,15 @@ class _RegisterViewState extends State<RegisterView> {
                     controller: _password,
                     obscureText: _obscure,
                     decoration: InputDecoration(
-                      labelText: 'Şifre',
+                      labelText: tr('auth.password'),
                       prefixIcon: const Icon(Icons.lock_outline),
                       suffixIcon: IconButton(
                         icon: Icon(_obscure ? Icons.visibility_off : Icons.visibility),
                         onPressed: () => setState(() => _obscure = !_obscure),
                       ),
                     ),
-                    validator: (v) => (v == null || v.length < 6) ? 'En az 6 karakter' : null,
+                    validator: (v) =>
+                        (v == null || v.length < 6) ? tr('errors.password_min') : null,
                   ),
 
                   const SizedBox(height: 16),
@@ -135,15 +138,10 @@ class _RegisterViewState extends State<RegisterView> {
                               );
 
                               if (!ok && mounted) {
-                                // Firebase’den gelen hataya göre mesaj ayarla
                                 final code = vm.error ?? '';
-                                String msg;
-                                if (code.contains('email-already-in-use')) {
-                                  msg =
-                                      "Bu e-posta adresiyle zaten bir hesap oluşturulmuş. Lütfen giriş yapmayı deneyin.";
-                                } else {
-                                  msg = "Kayıt işlemi başarısız oldu. Lütfen tekrar deneyin.";
-                                }
+                                final msg = code.contains('email-already-in-use')
+                                    ? tr('errors.email_in_use')
+                                    : tr('errors.register_generic');
                                 setState(() => _error = msg);
                               } else {
                                 if (mounted) Navigator.pop(context);
@@ -158,7 +156,7 @@ class _RegisterViewState extends State<RegisterView> {
                                 color: Colors.white,
                               ),
                             )
-                          : const Text('Kayıt Ol'),
+                          : Text(tr('auth.submit_register')),
                     ),
                   ),
 
@@ -166,10 +164,10 @@ class _RegisterViewState extends State<RegisterView> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text('Zaten üye misin?'),
+                      Text(tr('auth.already_member')),
                       TextButton(
                         onPressed: () => Navigator.pop(context),
-                        child: const Text('Giriş yap'),
+                        child: Text(tr('auth.sign_in')),
                       ),
                     ],
                   ),
@@ -177,7 +175,7 @@ class _RegisterViewState extends State<RegisterView> {
                   const SizedBox(height: 8),
                   OutlinedButton.icon(
                     icon: Image.asset('assets/google.png', height: 20),
-                    label: const Text('Google ile kayıt ol'),
+                    label: Text(tr('auth.register_with_google')),
                     onPressed: vm.isBusy ? null : () => vm.loginWithGoogle(planHint: Plan.basic),
                   ),
                 ],

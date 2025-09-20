@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:easy_localization/easy_localization.dart';      // ⬅️ eklendi
 import '../../data/history_item.dart';
 import '../viewmodels/history_viewmodel.dart';
 
@@ -12,21 +13,27 @@ class HistoryView extends StatelessWidget {
     return Consumer<HistoryViewModel>(builder: (context, vm, _) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text('Geçmiş'),
+          title: Text(tr('history.title')),
           actions: [
             if (vm.items.isNotEmpty)
               IconButton(
                 icon: const Icon(Icons.delete_sweep_rounded),
-                tooltip: 'Tümünü temizle',
+                tooltip: tr('history.clear_all'),
                 onPressed: () async {
                   final ok = await showDialog<bool>(
                     context: context,
                     builder: (_) => AlertDialog(
-                      title: const Text('Geçmişi temizle?'),
-                      content: const Text('Kaydedilen tüm görseller silinecek.'),
+                      title: Text(tr('history.dialog.clear_title')),
+                      content: Text(tr('history.dialog.clear_content')),
                       actions: [
-                        TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('İptal')),
-                        FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('Temizle')),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, false),
+                          child: Text(tr('common.cancel')),
+                        ),
+                        FilledButton(
+                          onPressed: () => Navigator.pop(context, true),
+                          child: Text(tr('history.clear')),
+                        ),
                       ],
                     ),
                   );
@@ -37,14 +44,14 @@ class HistoryView extends StatelessWidget {
         ),
         body: switch (vm.state) {
           HistoryState.loading => const Center(child: CircularProgressIndicator()),
-          HistoryState.error => Center(child: Text(vm.error ?? 'Bir hata oluştu')),
+          HistoryState.error => Center(child: Text(vm.error ?? tr('errors.generic'))),
           _ => vm.items.isEmpty
-              ? const Center(child: Text('Henüz kayıt yok.'))
+              ? Center(child: Text(tr('history.empty')))
               : Padding(
                   padding: const EdgeInsets.all(12),
                   child: GridView.builder(
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2, crossAxisSpacing: 12, mainAxisSpacing: 12, childAspectRatio: 3/4,
+                      crossAxisCount: 2, crossAxisSpacing: 12, mainAxisSpacing: 12, childAspectRatio: 3 / 4,
                     ),
                     itemCount: vm.items.length,
                     itemBuilder: (_, i) => _HistoryTile(item: vm.items[i], onDelete: () => vm.remove(i)),
@@ -114,4 +121,3 @@ class _HistoryTile extends StatelessWidget {
     );
   }
 }
-

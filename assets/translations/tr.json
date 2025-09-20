@@ -1,0 +1,457 @@
+{
+  "app_title": "Auria",
+  "auth": {
+    "login_title": "Giriş Yap",
+    "welcome_back": "Tekrar hoş geldin 👋",
+    "login_subtitle": "Hesabına giriş yap ya da Google ile devam et.",
+    "email": "E-posta",
+    "password": "Şifre",
+    "forgot_password": "Şifreni mi unuttun?",
+    "or": "veya",
+    "continue_with_google": "Google ile devam et",
+    "no_account": "Hesabın yok mu?",
+    "register": "Kayıt ol",
+    "submit_login": "Giriş Yap",
+    "register_title": "Kayıt Ol",
+    "join_us": "Aramıza katıl! 🚀",
+    "register_subtitle": "E-posta ve şifre ile ücretsiz hesabını oluştur. İstersen daha sonra Pro/Expert plana yükseltebilirsin.",
+    "full_name": "Ad Soyad",
+    "already_member": "Zaten üye misin?",
+    "sign_in": "Giriş yap",
+    "submit_register": "Hesap oluştur",
+    "register_with_google": "Google ile kayıt ol",
+    "reset": {
+      "title": "Şifreyi Sıfırla",
+      "form_title": "E-posta ile şifre sıfırla",
+      "form_subtitle": "Kayıtlı e-posta adresini gir; sana şifre sıfırlama bağlantısı gönderelim.",
+      "send_link": "Bağlantıyı Gönder",
+      "note": "Not: Gelen kutunu ve spam/istenmeyen klasörünü kontrol etmeyi unutma.",
+      "success_title": "Bağlantı gönderildi!",
+      "success_desc": "Şifre sıfırlama bağlantısını {email} adresine gönderdik. Gelen kutunu ve “Spam/İstenmeyen” klasörünü kontrol etmeyi unutma.",
+      "success_tip": "İpucu: E-posta gelmediyse birkaç dakika sonra tekrar deneyebilir veya adresinde yazım hatası olup olmadığını kontrol edebilirsin.",
+      "back": "Geri dön"
+    }
+  },
+  "errors": {
+    "login_generic": "Lütfen girdiğiniz bilgileri kontrol ediniz.",
+    "email_invalid": "Geçerli bir e-posta girin",
+    "password_min": "En az 6 karakter",
+    "name_required": "Adınızı girin",
+    "email_in_use": "Bu e-posta ile zaten bir hesap var. Lütfen giriş yapın.",
+    "register_generic": "Kayıt işlemi başarısız oldu. Lütfen tekrar deneyin.",
+    "email_required": "E-posta gerekli",
+    "reset_user_not_found": "Bu e-posta ile kayıtlı bir hesap bulunamadı.",
+    "reset_generic": "Şifre sıfırlama bağlantısı gönderilemedi. Lütfen tekrar deneyin.",
+    "unexpected_with_detail": "Bir hata oluştu: {error}",
+    "generic": "Bir hata oluştu."
+  },
+  "home": {
+    "hero": {
+      "welcome": "Hoş geldin! ✨",
+      "title": "Kıyafetini Sanal Olarak Dene",
+      "subtitle": "AI teknolojisi ile kıyafetlerin sende nasıl duracağını anında gör",
+      "cta_start": "Hemen Başla"
+    },
+    "features": {
+      "instant": {
+        "title": "Anında Dene",
+        "subtitle": "Fotoğrafını çek, kıyafeti seç ve sonucu gör"
+      },
+      "history": {
+        "title": "Geçmişini İncele",
+        "subtitle": "Daha önce denediklerine tekrar göz at"
+      },
+      "favorites": {
+        "title": "Favorilerin",
+        "subtitle": "Beğendiğin kombinleri kaydet"
+      },
+      "fast": {
+        "title": "Hızlı Sonuç",
+        "subtitle": "3 saniyede AI ile gerçekçi sonuç"
+      }
+    },
+    "howitworks": {
+      "step1": {
+        "title": "Fotoğrafını Çek",
+        "subtitle": "Kendi fotoğrafını çek veya galeriden seç"
+      },
+      "step2": {
+        "title": "Kıyafet Seç",
+        "subtitle": "Denemek istediğin kıyafetin fotoğrafını yükle"
+      },
+      "step3": {
+        "title": "Sonucu Gör",
+        "subtitle": "AI ile oluşturulan sonucu incele ve kaydet"
+      }
+    },
+     "sections": {
+      "what_can_you_do": "Neler Yapabilirsiniz?",
+      "how_it_works": "Nasıl Çalışır?"
+    },
+    "stats": {
+      "active_users": "Aktif Kullanıcı",
+      "outfits_tried": "Denenen Kıyafet",
+      "satisfaction": "Memnuniyet"
+    },
+    "cta": {
+      "title": "Hemen Dene!",
+      "subtitle": "İlk denemen ücretsiz. Kıyafetlerin sende nasıl duracağını gör.",
+      "button": "Başlayalım"
+    }
+  },
+  "tryon": {
+    "appbar_title": "VTON — Sanal Deneme",
+    "actions": { "back": "Geri", "next": "İleri", "try": "Dene" },
+    "model": {
+      "title": "Model Fotoğrafı",
+      "subtitle": "Yüz & gövde net, sade arka plan",
+      "tip": "İpucu: Tek kişi, iyi ışık ve sade arka plan en iyi sonucu verir."
+    },
+    "mode": {
+    "balanced": "Dengeli",
+    "quality": "Kalite",
+    "speed": "Hız",
+    "performance": "Performans"
+  },
+    "garment": {
+      "title": "Kıyafet Görseli",
+      "subtitle": "Flat-lay ya da net manken çekimi",
+      "tip": "İpucu: Flat-lay veya keskin manken fotoğrafı daha iyi sonuç verir."
+    },
+    "confirm": {
+      "summary": { "category": "Kategori", "mode": "Mod", "photo_type": "Kıyafet Foto Tipi" }
+    },
+    "category": { "auto": "Otomatik" ,"tops": "Üst giyim",
+      "bottoms": "Alt giyim",
+      "onePieces": "Tek parça"},
+    "photoType": { "auto": "Otomatik", "model": "Model üzerinde", "flat-lay": "Flat-lay" },
+    "steps": {
+      "model": "Model",
+      "garment": "Kıyafet",
+      "confirm": "Onay"
+    },
+    "quota": {
+    "title": "Deneme hakkın doldu",
+    "message_paid": "Aylık deneme hakkın tükendi. Paketi yükseltebilir veya hakların yenilendiğinde devam edebilirsin.",
+     "period": {
+    "daily": "günlük",
+    "monthly": "aylık"
+  },
+  "errors": {
+    "no_session": "Oturum bulunamadı.",
+    "free_daily_exceeded": "Günlük deneme hakkın doldu. Yarın tekrar dene veya plana geç.",
+    "paid_monthly_exceeded": "Aylık deneme hakkın doldu. Paketi yükselt veya gelecek ayı bekle.",
+    "generic": "Deneme hakkın uygun değil."
+  }
+  }
+  },
+   "processing": {
+    "title": "Görseller işleniyor…",
+    "subtitle": "Bu işlem birkaç saniye sürebilir.",
+    "missing_images": "Lütfen her iki görseli de seçin.",
+    "generic_error": "Bir hata oluştu."
+  },
+   "result": {
+    "title": "Sonuç",
+    "share": "Paylaş",
+    "share_subject": "Sanal deneme sonucum",
+    "empty": "Henüz sonuç yok.",
+    "save": "Kaydet",
+    "banner": {
+      "saved": "Geçmişe kaydedildi",
+      "save_failed": "Kaydedilemedi"
+    }
+  },
+  "nav": {
+    "home": "Ana Sayfa",
+    "try": "Dene",
+    "history": "Geçmiş",
+    "profile": "Profil"
+  },
+   "history": {
+    "title": "Geçmiş",
+    "clear_all": "Tümünü temizle",
+    "clear": "Temizle",
+    "empty": "Henüz kayıt yok.",
+    "dialog": {
+      "clear_title": "Geçmişi temizle?",
+      "clear_content": "Kaydedilen tüm görseller silinecek."
+    }
+  },
+  "common": {
+    "cancel": "İptal",
+    "save": "Kaydet",
+    "ok": "Tamam",
+    "back": "Geri",
+    "continue": "Devam Et",
+    "delete": "Sil",
+    "delete_permanently": "Kalıcı Olarak Sil",
+    "close": "Kapat"
+  },
+  "profile": {
+    "title": "Profil",
+    "errors": { "not_found": "Kullanıcı bilgileri bulunamadı" },
+    "sections": {
+      "account_security": "Hesap & Güvenlik",
+      "notifications": "Bildirimler",
+      "subscription": "Abonelik",
+      "other": "Diğer"
+    },
+    "items": {
+      "profile_info": { "title": "Profil Bilgileri", "subtitle": "Ad, soyad, e-posta" },
+      "privacy": { "title": "Gizlilik", "subtitle": "Veri işleme & izinler" },
+      "reset_password": { "title": "Şifreyi Sıfırla", "subtitle": "E-posta ile sıfırlama bağlantısı gönder" },
+      "delete_account": { "title": "Hesabı Sil", "subtitle": "Tüm verileri kalıcı olarak kaldır" },
+      "face_local_store": { "title": "Yüz verisini yerelde tut", "subtitle": "Cihazda sakla; buluta gönderme" },
+      "push_notifications": { "title": "Push Bildirimleri", "subtitle": "Kampanya ve sonuç hatırlatmaları" },
+      "plan": { "title": "Planım" },
+      "help": { "title": "Yardım & Destek", "subtitle": "SSS, iletişim" },
+      "about": { "title": "Hakkında", "version": "Sürüm: {version}" }
+    },
+    "edit": {
+      "title": "Profil Bilgileri",
+      "save_failed_with_error": "Kaydedilemedi: {error}"
+    },
+    "plan": { "free": "Ücretsiz", "basic": "Temel", "pro": "Pro", "expert": "Uzman" },
+    "logout": {
+      "button": "Çıkış Yap",
+      "confirm_title": "Çıkış yapmak istediğine emin misin?",
+      "confirm_action": "Çıkış Yap"
+    }
+  },
+  "privacy": {
+    "title": "Gizlilik",
+    "summary": {
+      "title": "Gizlilik İlkeleri",
+      "body": "Bu sayfa; uygulamamızda işlenen kişisel veriler, işleme amaçları, hukuki dayanaklar, saklama süreleri ve kullanıcı hakları hakkında bilgilendirme sağlar. Kapsam; KVKK (6698) ve GDPR ile uyumludur."
+    },
+    "sections": {
+      "processed_data": {
+        "title": "İşlenen Veri Kategorileri",
+        "items": {
+          "0": "Hesap verileri: ad-soyad (opsiyonel), e-posta.",
+          "1": "Kullanım verileri: uygulama içi etkileşimler, hata/performans logları (mümkün olduğunda anonim).",
+          "2": "Cihaz verileri: model, işletim sistemi sürümü, dil/bölge.",
+          "3": "İşleme görselleri: yüklediğiniz model fotoğrafı ve kıyafet görseli yalnızca işleme amacıyla kullanılır; kalıcı depolama yapılmaz."
+        }
+      },
+      "purposes": {
+        "title": "İşleme Amaçları",
+        "items": {
+          "0": "Hizmetin sunulması: sanal deneme çıktısının üretilmesi.",
+          "1": "Hesap yönetimi: kimlik doğrulama, oturum devamlılığı.",
+          "2": "Güvenlik: kötüye kullanım tespiti, sahte/zararlı içerik önleme.",
+          "3": "Ürün geliştirme: anonimleştirilmiş istatistiklerle deneyimi iyileştirme.",
+          "4": "Yasal yükümlülükler: talep/uyuşmazlık durumlarında mevzuata uygun hareket edilmesi."
+        }
+      },
+      "legal_basis": {
+        "title": "Hukuki Dayanak",
+        "items": {
+          "0": "Açık rıza (GDPR m.6/1-a, KVKK m.5/1): görsel işleme.",
+          "1": "Sözleşmenin ifası (GDPR m.6/1-b): hizmet sağlanması ve hesap yönetimi.",
+          "2": "Meşru menfaat (GDPR m.6/1-f): dolandırıcılık önleme, güvenlik ve ürün geliştirme.",
+          "3": "Hukuki yükümlülük (GDPR m.6/1-c): kayıt tutma, resmi taleplere yanıt."
+        }
+      },
+      "retention": {
+        "title": "Saklama Süresi",
+        "items": {
+          "0": "Try-on görselleri: yalnızca işleme anında kullanılır; işlem tamamlanınca silinir.",
+          "1": "Hesap verileri: hesabınız silinene kadar veya mevzuat gereği tutulması gereken süre boyunca.",
+          "2": "Log/analitik: mümkün olduğunca anonim şekilde sınırlı süreyle saklanır."
+        }
+      },
+      "third_parties": {
+        "title": "Aktarım & Üçüncü Taraflar",
+        "items": {
+          "0": "Kimlik doğrulama/altyapı sağlayıcıları (ör. kimlik, hata/performans izleme).",
+          "1": "Görsel işleme sağlayıcısı: görseller yalnızca talep ettiğiniz try-on çıktısı için geçici olarak işlenir; kalıcı depolama yapılmaz.",
+          "2": "Hizmet tedarikçileri, sözleşmesel gizlilik ve güvenlik yükümlülükleri altında ve amacına uygun şekilde erişebilir."
+        }
+      },
+      "cross_border": {
+        "title": "Yurt Dışına Aktarım",
+        "items": {
+          "0": "Bazı sağlayıcılar yurt dışında bulunabilir. Aktarım; yeterlilik kararı, standart sözleşme maddeleri ve ek güvenlik önlemleri ile yapılır."
+        }
+      },
+      "security": {
+        "title": "Güvenlik",
+        "items": {
+          "0": "İletim ve depolamada uygun teknik/idari tedbirler (şifreleme, erişim kontrolü, ağ güvenliği).",
+          "1": "Yetkisiz erişim, ifşa, değişiklik ve imhaya karşı risk temelli yaklaşım."
+        }
+      },
+      "user_rights": {
+        "title": "Kullanıcı Hakları",
+        "items": {
+          "0": "Veriye erişim ve bilgi talebi.",
+          "1": "Düzeltme ve güncelleme.",
+          "2": "Silme (unutulma hakkı) ve hesap kapatma.",
+          "3": "İşlemenin kısıtlanması ve verinin taşınabilirliği.",
+          "4": "Rızanın geri alınması (geri alma, öncesindeki işlemenin hukuka uygunluğunu etkilemez).",
+          "5": "İtiraz hakkı (meşru menfaat gerekçeli işlemlere karşı)."
+        }
+      },
+      "children": {
+        "title": "Çocukların Verileri",
+        "items": {
+          "0": "Hizmet 13 yaş altına yönelik değildir. Bu kapsamdaki kayıtlar tespit edilirse kapatılır ve veriler silinir."
+        }
+      },
+      "cookies": {
+        "title": "Çerezler & Benzeri Teknolojiler",
+        "items": {
+          "0": "Uygulama içi tercihlerin hatırlanması ve performans ölçümü için cihazda sınırlı veri saklanabilir. Tarayıcı modülünde zorunlu ve tercihe bağlı çerezler ayrıştırılır."
+        }
+      },
+      "contact": {
+        "title": "İletişim",
+        "items": {
+          "0": "Veri Sorumlusu: Uygulama Operatörü",
+          "1": "E-posta: mustafa.caglar147@gmail.com",
+          "2": "Adres: Ankara/Türkiye"
+        }
+      },
+      "updates": {
+        "title": "Güncellemeler",
+        "items": {
+          "0": "Gizlilik politikası zaman zaman güncellenebilir. Önemli değişiklikleri uygulama içi bildirim ve/veya e-posta ile duyururuz."
+        }
+      }
+    }
+  },
+  "delete": {
+    "title": "Hesabı Sil",
+    "steps": {
+      "warning": "Uyarı",
+      "reauth": "Kimlik Doğrulama",
+      "confirm": "Son Onay",
+      "reauth_title": "Kimlik Doğrulama"
+    },
+    "wizard": {
+      "warning_text": "Bu işlem kalıcıdır. Hesap bilgilerin, geçmiş görsellerin ve yerel profil avatarın silinecek.",
+      "verified": "Kimlik doğrulandı",
+      "confirm_word": "SİL",
+      "confirm_instruction": "Devam etmek için aşağıdaki kutuya {word} ifadesini BÜYÜK HARFLERLE yaz.",
+      "confirm_mismatch": "Girdi eşleşmiyor. Lütfen {word} ifadesini BÜYÜK HARFLERLE yazın.",
+      "confirm_label": "{word} yaz"
+    },
+    "actions": {
+      "reauth_email": "E-posta ile Doğrula",
+      "reauth_google": "Google ile Doğrula",
+      "delete_permanently": "Kalıcı Olarak Sil"
+    },
+    "dialog": {
+      "title": "Hesap Silindi",
+      "content": "Hesabın ve verilerin kalıcı olarak kaldırıldı."
+    },
+    "errors": {
+      "session_missing": "Oturum bulunamadı.",
+      "google_failed": "Google doğrulaması başarısız.",
+      "needs_recent_login": "Silme işlemi başarısız (yeniden giriş gerekebilir).",
+      "delete_failed": "Silme işlemi başarısız: {error}",
+      "missing_credentials": "E-posta ve şifre gerekli.",
+      "codes": {
+        "user_not_found": "Bu e-posta ile kullanıcı bulunamadı.",
+        "wrong_password": "Şifre hatalı. Lütfen tekrar deneyin.",
+        "invalid_email": "Geçersiz e-posta adresi.",
+        "missing_credentials": "E-posta ve şifre gerekli.",
+        "user_disabled": "Bu hesap devre dışı bırakılmış.",
+        "too_many_requests": "Çok fazla deneme yapıldı. Lütfen daha sonra tekrar deneyin.",
+        "auth_failed": "Kimlik doğrulama başarısız. ({code})"
+      }
+    }
+  },
+   "notifications": {
+    "title": "Bildirimler",
+    "push_title": "Push Bildirimleri",
+    "push_subtitle": "Kampanya ve sonuç hatırlatmaları",
+    "note": "Not: iOS/Android sistem izinleri ayrıca istenebilir."
+  },
+  "help": {
+    "title": "Yardım & Destek",
+    "contact_us": "Bize Ulaşın"
+  },
+  "about": {
+    "title": "Hakkında",
+    "version": "Sürüm: {version}",
+    "description": "Bu uygulama, yapay zekâ ile sanal kıyafet denemeyi kolaylaştırır."
+  },
+  
+  "plans": {
+    "title_upgrade": "Planını Yükselt",
+    "tiers": {
+      "basic": "Basic",
+      "pro": "Pro",
+      "expert": "Expert"
+    },
+    "currency": "₺",
+     "period": {
+    "month": "/ay",
+    "year": "/yıl"
+  },
+  "trial": {
+    "basic": "İlk 7 gün ücretsiz",
+    "pro": "İlk 1 ay ücretsiz",
+    "expert": ""
+  },
+     "billing": {
+      "monthly": "Aylık",
+      "yearly": "Yıllık",
+      "yearly_note": "En avantajlı"
+    },
+    "cta": {
+      "start_free": "7 gün ücretsiz başlat",
+      "start_7day_trial": "30 gün ücretsiz başlat",
+      "select_plan": "Plan Seç",
+      "buy_now": "Şimdi Satın Al"
+    },
+    "snack": {
+      "purchase_started": "{tier} için işlem başlatıldı.",
+      "purchase_error": "Satın alma hatası: {error}"
+    },
+    "basic": {
+      "title": "Basic",
+      "description": "Hemen dene: İlk izlenim için yeterli.",
+      "bullets": {
+        "0": "50 sonuç/ay",
+        "1": "Standart çözünürlük",
+        "2": "Filigranlı çıktı",
+        "3": "Temel poz eşleştirme",
+        "4": "Reklam yok"
+      }
+    },
+    "pro": {
+      "title": "Pro",
+      "description": "HD kalite ile daha gerçekçi sonuçlar.",
+      "bullets": {
+        "0": "100 sonuç/ay",
+        "1": "HD çözünürlük",
+        "2": "Işık/ten tonu uyumu (renk eşleme)",
+        "3": "Poz normalizasyonu (hizalama)",
+        "4": "Filigran yok · Hızlı sıra",
+        "5": "Reklam yok"
+      }
+    },
+    "expert": {
+      "title": "Expert",
+      "description": "Profesyonel hız, profesyonel gerçekçilik.",
+      "bullets": {
+        "0": "200 sonuç/ay",
+        "1": "Gölge & kırışıklık realistik",
+        "2": "Sınırsız beden/renk karşılaştırması",
+        "3": "Ticari lisans · 5 ekip üyesi",
+        "4": "Reklam yok",
+        "5": "Öncelikli canlı destek"
+      }
+    },
+    "actions": {
+    "upgrade": "Paketi Yükselt"
+  }
+  }
+
+
+  
+}
