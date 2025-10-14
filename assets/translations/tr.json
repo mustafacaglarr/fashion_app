@@ -387,6 +387,11 @@
       "pro": "Pro",
       "expert": "Expert"
     },
+     "info": {
+      "store_loading": "Mağaza yükleniyor…",
+      "store_unavailable": "Mağaza şu anda kullanılamıyor.",
+      "product_preparing": "Seçtiğiniz plan hazırlanıyor…"
+    },
     "currency": "₺",
      "period": {
     "month": "/ay",
@@ -394,7 +399,7 @@
   },
   "trial": {
     "basic": "İlk 7 gün ücretsiz",
-    "pro": "İlk 1 ay ücretsiz",
+    "pro": "İlk 14 gün ücretsiz",
     "expert": ""
   },
      "billing": {
@@ -403,8 +408,8 @@
       "yearly_note": "En avantajlı"
     },
     "cta": {
-      "start_free": "7 gün ücretsiz başlat",
-      "start_7day_trial": "30 gün ücretsiz başlat",
+      "start_7day_trials": "7 gün ücretsiz başlat",
+      "start_14day_trial": "14 gün ücretsiz başlat",
       "select_plan": "Plan Seç",
       "buy_now": "Şimdi Satın Al"
     },

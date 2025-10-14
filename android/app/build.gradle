@@ -6,6 +6,12 @@ plugins {
     id "dev.flutter.flutter-gradle-plugin"
 }
 
+import java.util.Properties
+import java.io.FileInputStream
+
+def keystorePropertiesFile = rootProject.file("key.properties")
+def keystoreProperties = new Properties()
+keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 
 android {
     namespace = "com.caglar.fashion_app"
@@ -16,39 +22,39 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
-
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8
-    }
+    kotlinOptions { jvmTarget = JavaVersion.VERSION_1_8 }
 
     defaultConfig {
         applicationId = "com.caglar.fashion_app"
-
-        // Firebase Auth >=23.x için minSdk en az 23 olmalı
-        minSdk = 23
+        minSdkVersion = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
-
-        // Çok sayıda method referansı için güvenli
         multiDexEnabled true
     }
 
-    buildTypes {
+    signingConfigs {
         release {
-            // Geliştirme için debug imzası ile
-            signingConfig = signingConfigs.debug
+            storeFile file(keystoreProperties['storeFile'])   // android/app/auria-key.jks
+            storePassword keystoreProperties['storePassword']
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+        }
+    }
+
+    buildTypes {
+        debug { }
+        release {
+            signingConfig signingConfigs.release
+            minifyEnabled false
+            shrinkResources false
         }
     }
 }
 
-flutter {
-    source = "../.."
-}
+flutter { source = "../.." }
 
 dependencies {
-    
     implementation platform("org.jetbrains.kotlin:kotlin-bom:2.0.21")
-    // (Önerilen) Multidex kütüphanesi
     implementation "androidx.multidex:multidex:2.0.1"
 }

@@ -21,16 +21,16 @@ class PlanViewModel extends ChangeNotifier {
 
   /// 🇹🇷 Türkiye fiyatları (₺)
   static const Map<PlanTier, PlanPrice> _pricesTr = {
-    PlanTier.basic:  PlanPrice(monthly: 99.0, yearly: 949.0, yearlyCompareAt: 1188.0),
-    PlanTier.pro:    PlanPrice(monthly: 249.0, yearly: 2399.0, yearlyCompareAt: 2988.0),
-    PlanTier.expert: PlanPrice(monthly: 499.0, yearly: 4799.0, yearlyCompareAt: 5988.0),
+    PlanTier.basic:  PlanPrice(monthly: 89.90, yearly: 949.90, yearlyCompareAt: 1078.0),
+    PlanTier.pro:    PlanPrice(monthly: 249.90, yearly: 2399.90, yearlyCompareAt: 2998.0),
+    PlanTier.expert: PlanPrice(monthly: 499.90, yearly: 4799.90, yearlyCompareAt: 5998.0),
   };
 
   /// 🇪🇺 Avrupa fiyatları (€)
   static const Map<PlanTier, PlanPrice> _pricesEn = {
-    PlanTier.basic:  PlanPrice(monthly: 4.99, yearly: 49.9, yearlyCompareAt: 59.88),
-    PlanTier.pro:    PlanPrice(monthly: 9.99, yearly: 99.9, yearlyCompareAt: 119.88),
-    PlanTier.expert: PlanPrice(monthly: 19.99, yearly: 199.9, yearlyCompareAt: 239.88),
+    PlanTier.basic:  PlanPrice(monthly: 5.99, yearly: 59.99, yearlyCompareAt: 71.88),
+    PlanTier.pro:    PlanPrice(monthly: 11.99, yearly: 119.99, yearlyCompareAt: 143.88),
+    PlanTier.expert: PlanPrice(monthly: 23.99, yearly: 239.99, yearlyCompareAt: 287.88),
   };
 
   /// Aktif locale’e göre doğru fiyat tablosunu seç

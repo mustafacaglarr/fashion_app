@@ -12,7 +12,28 @@
           "package_name": "com.caglar.fashion_app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "547880124958-o5e8571rfp9jauhp09v77qdaiihdf24j.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.caglar.fashion_app",
+            "certificate_hash": "f35bdd1a203bb34f89edb345c44b386cb9ea4172"
+          }
+        },
+        {
+          "client_id": "547880124958-pkq85b57p4p1jjm4rg75gpnsvro3d7g6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.caglar.fashion_app",
+            "certificate_hash": "de8f4b1c7023b07e07646d3b0cc950c7b5aadcbf"
+          }
+        },
+        {
+          "client_id": "547880124958-mij93tj4hbsc02m72rv5qk5h59vdfkht.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyC7doYB4dfhmuW2gmJfD40damQaLx6f6Uo"
@@ -20,7 +41,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "547880124958-mij93tj4hbsc02m72rv5qk5h59vdfkht.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "547880124958-6g84aos3menmotk2al2aeuol72bc2j42.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.caglar.fashionApp"
+              }
+            }
+          ]
         }
       }
     }

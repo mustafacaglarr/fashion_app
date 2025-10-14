@@ -13,6 +13,7 @@ class PlanView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<PlanViewModel>();
+    final purchase = context.watch<PurchaseService>(); // <-- PurchaseService state’i dinle
 
     // Tier etiketi (snackbar için lokalize ad)
     String tierLabel(PlanTier t) {
@@ -23,15 +24,47 @@ class PlanView extends StatelessWidget {
       }
     }
 
-    // CTA metni: Basic için "Start free", diğerleri için "7-day trial"
-    final String ctaText = switch (vm.selected) {
-      null            => tr('plans.cta.select_plan'),
-      PlanTier.basic  => tr('plans.cta.start_free'),
-      PlanTier.pro    => tr('plans.cta.start_7day_trial'),
-      PlanTier.expert => tr('plans.cta.buy_now'),
-    };
+    // Seçilen tier+period için ürünün yüklenip yüklenmediğini kontrol et
+    bool _productLoadedFor(PlanTier t, BillingPeriod p) {
+      final canonicalId = kProductIdMap[(t, p)];
+      if (canonicalId == null) return false;
+      final aliases = kProductIdAliases[canonicalId] ?? const <String>[];
+      final loadedIds = purchase.products.map((e) => e.id).toSet();
+      if (loadedIds.contains(canonicalId)) return true;
+      for (final a in aliases) {
+        if (loadedIds.contains(a)) return true;
+      }
+      return false;
+    }
 
+    // CTA metni: period + tier'a göre
+    final String ctaText = () {
+      if (vm.selected == null) return tr('plans.cta.select_plan');
 
+      final t = vm.selected!;
+      final p = vm.period;
+
+      if (p == BillingPeriod.yearly) {
+        // Yıllıkta trial yok → buy now
+        return tr('plans.cta.buy_now');
+      }
+
+      // Monthly
+      switch (t) {
+        case PlanTier.basic:
+          return tr('plans.cta.start_7day_trials');   // "Start 7-day free trial"
+        case PlanTier.pro:
+          return tr('plans.cta.start_14day_trial');   // "Start 30-day free trial" (14 değil, 30)
+        case PlanTier.expert:
+          return tr('plans.cta.buy_now');             // Expert'te trial yok
+      }
+    }();
+
+    // Buton aktif/pasif koşulu
+    final bool hasSelection = vm.selected != null;
+    final bool productReady = hasSelection && _productLoadedFor(vm.selected!, vm.period);
+    final bool serviceReady = purchase.available && !purchase.loading;
+    final bool canPress = hasSelection && serviceReady && productReady;
 
     // Bullet listeleri
     final basicBullets  = List.generate(5, (i) => tr('plans.basic.bullets.$i'));
@@ -92,6 +125,21 @@ class PlanView extends StatelessWidget {
           ),
 
           const SizedBox(height: 22),
+
+          // Bilgi satırı (isteğe bağlı): mağaza ve ürün durumunu kullanıcıya göster
+          if (purchase.loading || !purchase.available || (hasSelection && !productReady))
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Text(
+                purchase.loading
+                    ? tr('plans.info.store_loading')            // "Mağaza yükleniyor…"
+                    : (!purchase.available
+                        ? tr('plans.info.store_unavailable')     // "Mağaza şu anda kullanılamıyor."
+                        : tr('plans.info.product_preparing')),   // "Seçtiğiniz plan hazırlanıyor…"
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
+              ),
+            ),
+
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
@@ -103,43 +151,62 @@ class PlanView extends StatelessWidget {
                 ),
                 elevation: 3,
               ),
-              onPressed: vm.selected == null
+              onPressed: !canPress
                   ? null
                   : () async {
                       final chosen = vm.selected!;
                       final period = vm.period;
-                      final purchase = context.read<PurchaseService>();
 
                       try {
+                        // init’in tamamlanmış olduğundan emin ol
+                        await purchase.ready;
                         await purchase.buyFor(chosen, period);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              tr('plans.snack.purchase_started', namedArgs: {
-                                'tier': tierLabel(chosen),
-                              }),
+
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                tr('plans.snack.purchase_started', namedArgs: {
+                                  'tier': tierLabel(chosen),
+                                }),
+                              ),
                             ),
-                          ),
-                        );
+                          );
+                        }
                       } catch (e) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              tr('plans.snack.purchase_error', namedArgs: {
-                                'error': e.toString(),
-                              }),
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                tr('plans.snack.purchase_error', namedArgs: {
+                                  'error': e.toString(),
+                                }),
+                              ),
                             ),
-                          ),
-                        );
+                          );
+                        }
                       }
                     },
-              child: Text(
-                ctaText,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (purchase.loading) ...[
+                    const SizedBox(
+                      height: 18,
+                      width: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                    const SizedBox(width: 10),
+                  ],
+                  Text(
+                    ctaText,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),

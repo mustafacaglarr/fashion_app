@@ -393,6 +393,11 @@
       "pro": "Pro",
       "expert": "Expert"
     },
+    "info": {
+      "store_loading": "Store is loading…",
+      "store_unavailable": "The store is currently unavailable.",
+      "product_preparing": "Your selected plan is being prepared…"
+    },
     "currency": "€",
     "period": {
     "month": "/month",
@@ -400,7 +405,7 @@
   },
   "trial": {
     "basic": "First 7 days free",
-    "pro": "First 1 month free",
+    "pro": "First 14 days free",
     "expert": ""
   },
      "billing": {
@@ -409,8 +414,8 @@
       "yearly_note": "Best value"
     },
     "cta": {
-      "start_free": "Start 7-day free trial",
-      "start_7day_trial": "Start 30-day free trial",
+      "start_7day_trials": "Start 7-day free trial",
+      "start_14day_trial": "Start 14-day free trial",
       "select_plan": "Select a plan",
       "buy_now": "Buy now"
     },
