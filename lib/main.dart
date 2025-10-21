@@ -5,6 +5,7 @@ import 'package:fashion_app/app_keys.dart';
 import 'package:fashion_app/services/purchase_service.dart';
 import 'package:fashion_app/services/tryon_quota_service_firebase.dart';
 import 'package:fashion_app/ui/pages/profile_view.dart';
+import 'package:fashion_app/ui/pages/settings/plan_view.dart';
 import 'package:fashion_app/ui/pages/tryon_wizard_view.dart';
 import 'package:fashion_app/ui/viewmodels/plan_viewmodel.dart';
 import 'package:fashion_app/ui/viewmodels/settings_viewmodel.dart';
@@ -134,6 +135,7 @@ class VtonApp extends StatelessWidget {
         '/tryon': (_) => const TryOnWizardView(),
         '/history': (_) => const HistoryView(),
         '/profile': (_) => const ProfileView(),
+        '/upgrade': (_) => const PlanView(),
       },
 
       home: const AuthGate(),

@@ -1,14 +1,11 @@
 // lib/ui/pages/processing_view.dart
 import 'package:fashion_app/app_keys.dart';
 import 'package:flutter/material.dart';
-import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fashion_app/ui/viewmodels/tryon_viewmodel.dart';
+import 'package:lottie/lottie.dart'; // ✅ Lottie
 import 'result_view.dart';
-
-// ⬇️ appNavigatorKey, rootMessengerKey import et
-import '../../main.dart'; // veya keys’i koyduğun dosya
 
 class ProcessingView extends StatefulWidget {
   const ProcessingView({super.key});
@@ -18,59 +15,69 @@ class ProcessingView extends StatefulWidget {
 
 class _ProcessingViewState extends State<ProcessingView> {
   VoidCallback? _listener;
+  late final TryonViewModel _vm;     // VM'i cache'le
+  bool _navigated = false;           // tekrar navigasyonu engelle
+  late final DateTime _arrivedAt;    // min animasyon süresi için giriş zamanı
+  static const Duration _minSplash = Duration(milliseconds: 600);
+
+  String _trOr(String key, String fallback) {
+    final v = tr(key);
+    return (v == key) ? fallback : v;
+  }
+
+  Future<void> _maybeNavigate(TryonState s) async {
+    if (!mounted || _navigated) return;
+
+    if (s == TryonState.done || s == TryonState.error) {
+      final elapsed = DateTime.now().difference(_arrivedAt);
+      if (elapsed < _minSplash) {
+        await Future.delayed(_minSplash - elapsed);
+      }
+      if (!mounted || _navigated) return;
+
+      _navigated = true;
+      if (s == TryonState.done) {
+        appNavigatorKey.currentState?.pushReplacement(
+          MaterialPageRoute(builder: (_) => const ResultView()),
+        );
+      } else {
+        appNavigatorKey.currentState?.maybePop();
+      }
+    }
+  }
 
   @override
   void initState() {
     super.initState();
+    _arrivedAt = DateTime.now();
 
+    _vm = context.read<TryonViewModel>();
+
+    // State değişimlerini dinle (context kullanmadan)
+    _listener = () {
+      if (!mounted || _navigated) return;
+      _maybeNavigate(_vm.state);
+    };
+    _vm.addListener(_listener!);
+
+    // İlk frame’de de kontrol et + işi BURADA başlat
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final vm = context.read<TryonViewModel>();
+      if (!mounted) return;
+      final s0 = _vm.state;
 
-      _listener = () {
-        // UI aksiyonlarını post-frame'e sar — build sırasında tetiklenmesin
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (!mounted) return;
-
-          if (vm.state == TryonState.error) {
-            final msg = (vm.errorMessage?.isNotEmpty ?? false)
-                ? vm.errorMessage!
-                : tr('processing.generic_error');
-
-            // ⬇️ context YOK — global messenger kullan
-            rootMessengerKey.currentState?.showSnackBar(
-              SnackBar(content: Text(msg)),
-            );
-
-            // ⬇️ context YOK — global navigator kullan
-            appNavigatorKey.currentState?.maybePop();
-          } else if (vm.state == TryonState.done) {
-            appNavigatorKey.currentState?.pushReplacement(
-              MaterialPageRoute(builder: (_) => const ResultView()),
-            );
-          }
-        });
-      };
-
-      vm.addListener(_listener!);
-
-      // Eğer zaten DONE ise hemen sonuç ekranına geç
-      if (vm.state == TryonState.done) {
-        appNavigatorKey.currentState?.pushReplacement(
-          MaterialPageRoute(builder: (_) => const ResultView()),
-        );
+      if (s0 == TryonState.idle) {
+        _vm.submit(); // await etmiyoruz; listener yönetecek
+      } else if (s0 == TryonState.done || s0 == TryonState.error) {
+        _maybeNavigate(s0);
       }
+      // uploading/processing ise animasyon zaten bu ekranda gösterilecek
     });
   }
 
   @override
   void dispose() {
-    // ⬇️ context.read() KULLANMA — dispose’da context’e dokunma
     if (_listener != null) {
-      // provider’a erişirken context kullanmamak için listen:false ile mounted check’ine gerek yok
-      try {
-        final vm = Provider.of<TryonViewModel>(context, listen: false);
-        vm.removeListener(_listener!);
-      } catch (_) {/* widget dispose iken erişemezsek sessiz geç */}
+      try { _vm.removeListener(_listener!); } catch (_) {}
     }
     super.dispose();
   }
@@ -87,14 +94,32 @@ class _ProcessingViewState extends State<ProcessingView> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              SizedBox(height: 180, child: Lottie.asset('assets/processing.json')),
-              const SizedBox(height: 16),
-              Text(tr('processing.title'), style: t.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+              // 🔁 Lottie processing animasyonu
+              // assets/processing.json dosyanıza göre yolu kontrol edin
+              Lottie.asset(
+                'assets/processing.json',
+                width: 160,
+                height: 160,
+                repeat: true,
+              ),
               const SizedBox(height: 8),
-              Text(tr('processing.subtitle'), style: t.bodyMedium?.copyWith(color: Colors.black54), textAlign: TextAlign.center),
+              Text(
+                _trOr('processing.title', 'Processing images...'),
+                style: t.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                _trOr('processing.subtitle', 'This may take a few seconds.'),
+                style: t.bodyMedium?.copyWith(color: Colors.black54),
+                textAlign: TextAlign.center,
+              ),
               if (!isBusy) ...[
                 const SizedBox(height: 16),
-                Text(tr('processing.note_waiting'), style: t.bodySmall?.copyWith(color: Colors.black45), textAlign: TextAlign.center),
+                Text(
+                  _trOr('processing.note_waiting', 'Starting the job...'),
+                  style: t.bodySmall?.copyWith(color: Colors.black45),
+                  textAlign: TextAlign.center,
+                ),
               ],
             ],
           ),

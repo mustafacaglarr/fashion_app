@@ -131,6 +131,7 @@
       "confirm": "Onay"
     },
     "quota": {
+    "cta_upgrade": "₺0,00 ÖDEYEREK DENE", 
     "title": "Deneme hakkın doldu",
     "message_paid": "Aylık deneme hakkın tükendi. Paketi yükseltebilir veya hakların yenilendiğinde devam edebilirsin.",
      "period": {
@@ -140,6 +141,7 @@
   "errors": {
     "no_session": "Oturum bulunamadı.",
     "free_daily_exceeded": "Günlük deneme hakkın doldu. Yarın tekrar dene veya plana geç.",
+    "title_free": "Günlük deneme hakkın doldu.",
     "paid_monthly_exceeded": "Aylık deneme hakkın doldu. Paketi yükselt veya gelecek ayı bekle.",
     "generic": "Deneme hakkın uygun değil."
   }
@@ -149,7 +151,8 @@
     "title": "Görseller işleniyor…",
     "subtitle": "Bu işlem birkaç saniye sürebilir.",
     "missing_images": "Lütfen her iki görseli de seçin.",
-    "generic_error": "Bir hata oluştu."
+    "generic_error": "Bir hata oluştu.",
+    "note_waiting": "İşlem başlatılıyor… birkaç saniye sürebilir."
   },
    "result": {
     "title": "Sonuç",
@@ -186,6 +189,7 @@
     "continue": "Devam Et",
     "delete": "Sil",
     "delete_permanently": "Kalıcı Olarak Sil",
+    "no_thanks": "Hayır Teşekkürler",
     "close": "Kapat"
   },
   "profile": {

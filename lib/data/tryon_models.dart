@@ -39,6 +39,7 @@ class TryonRequest {
   final int numSamples;
   final bool segmentationFree;
   final String outputFormat; // "png" | "jpeg"
+  final bool syncMode;
 
   TryonRequest({
     required this.modelImageUrlOrDataUri,
@@ -50,6 +51,7 @@ class TryonRequest {
     this.numSamples = 1,
     this.segmentationFree = true,
     this.outputFormat = "png",
+    this.syncMode = true,
   });
 
   Map<String, dynamic> toFalInputJson() => {
@@ -62,6 +64,7 @@ class TryonRequest {
         "num_samples": numSamples,
         "segmentation_free": segmentationFree,
         "output_format": outputFormat,
+        "sync_mode": syncMode,
       };
 }
 

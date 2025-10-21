@@ -70,7 +70,7 @@ class AuthService {
       uid: cred.user!.uid,
       name: name,
       email: email,
-      plan: planHint ?? Plan.basic,
+      plan: planHint ?? Plan.free,
     );
   }
 

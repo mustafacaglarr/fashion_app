@@ -2,7 +2,7 @@ name: fashion_app
 description: "A new Flutter project."
 publish_to: 'none'
 
-version: 1.0.8+8
+version: 1.0.11+11
 
 environment:
   sdk: ^3.6.2
@@ -84,12 +84,8 @@ flutter:
   uses-material-design: true
   assets:
     - .env
-    - assets/hero.png
-    - assets/step1.png
-    - assets/step2.png
-    - assets/step3.png
-    - assets/trust.png
     - assets/tryon.json
+    - assets/error.json
     - assets/google.png
     - assets/processing.json
     - assets/translations/     # <-- EKLENDİ (çeviri dosyaları buraya)

@@ -1,6 +1,8 @@
 import 'package:fashion_app/app_keys.dart';
 import 'package:fashion_app/ui/pages/processing_view.dart';
-import 'package:fashion_app/ui/pages/settings/plan_view.dart';
+// ⬇️ Eski: tryon_error_view.dart yerine modern upsell ekranı
+import 'package:fashion_app/ui/pages/tryon_limit_view.dart';
+
 import 'package:fashion_app/ui/viewmodels/tryon_viewmodel.dart';
 import 'package:fashion_app/ui/widgets/filled_button_loading.dart';
 import 'package:fashion_app/ui/widgets/image_pick_card.dart';
@@ -13,7 +15,6 @@ import '../../../data/tryon_models.dart';
 class TryOnWizardView extends StatefulWidget {
   const TryOnWizardView({super.key});
 
-  /// İstersen hep bunu çağır: yeni route + anında reset.
   static Future<void> open(BuildContext context) async {
     context.read<TryonViewModel>().reset();
     await Navigator.push(
@@ -27,6 +28,8 @@ class TryOnWizardView extends StatefulWidget {
 }
 
 class _TryOnWizardViewState extends State<TryOnWizardView> {
+  bool _submitting = false;
+
   @override
   void initState() {
     super.initState();
@@ -35,7 +38,6 @@ class _TryOnWizardViewState extends State<TryOnWizardView> {
     });
   }
 
-  // ⬇️ Eksik çeviri durumunda enum adı/ham değerle geri dön.
   String _trOr(String key, String fallback) {
     final v = tr(key);
     return (v == key) ? fallback : v;
@@ -50,6 +52,93 @@ class _TryOnWizardViewState extends State<TryOnWizardView> {
         String catLabel(GarmentCategory c) => _trOr('tryon.category.${c.name}', c.name);
         String modeLabel(TryonMode m) => _trOr('tryon.mode.${m.name}', m.name);
         String photoTypeLabel(String v) => _trOr('tryon.photoType.$v', v);
+
+        Future<void> _handleTry() async {
+  if (!vm.canSubmitFromConfirm || _submitting) return;
+  setState(() => _submitting = true);
+
+  // 1) Sadece hak/limit KONTROLÜ (işi başlatma!)
+  final qr = await vm.checkQuotaOnly();
+
+  // 2) Limit yoksa: upsell ekranı
+  if (!qr.allowed) {
+    setState(() => _submitting = false);
+
+    final isFree = qr.plan == 'free';
+
+    final title = isFree
+        ? _trOr('tryon.quota.errors.title_free', 'Günlük hakkın doldu')
+        : _trOr('tryon.quota.errors.title_paid', 'Plan limitin doldu');
+
+    final msgKey = switch (qr.code) {
+      'free_daily_exceeded'   => 'tryon.quota.errors.free_daily_exceeded',
+      'paid_monthly_exceeded' => 'tryon.quota.errors.paid_monthly_exceeded',
+      'no_session'            => 'tryon.quota.errors.no_session',
+      _                       => 'tryon.quota.errors.generic',
+    };
+
+    final subtitle = _trOr(
+      msgKey,
+      isFree
+          ? 'Daha fazla deneme için Süper’e geçebilirsin.'
+          : 'Limitini artırmak için planını yönet.',
+    );
+
+    final primaryCta = isFree
+        ? _trOr('tryon.quota.cta_upgrade', '₺0,00 ÖDEYEREK DENE')
+        : _trOr('tryon.quota.cta_manage', 'PLANI YÖNET');
+
+    final secondaryCta = _trOr('common.no_thanks', 'HAYIR TEŞEKKÜRLER');
+
+    const defaults = <String>[
+      '100 results/month',
+      'HD resolution',
+      'Lighting/skin tone matching (color match)',
+      'Pose normalization (alignment)',
+      'No watermark · Fast queue',
+      'No ads',
+    ];
+    final proBullets = List<String>.generate(
+      defaults.length,
+      (i) => _trOr('plans.pro.bullets.$i', defaults[i]),
+    );
+
+    final features = <FeatureItem>[
+      FeatureItem.infinityIcon(proBullets[0], ''),
+      FeatureItem.refresh(proBullets[1], ''),
+      FeatureItem.refresh(proBullets[2], ''),
+      FeatureItem.headphones(proBullets[3], ''),
+      FeatureItem.infinityIcon(proBullets[4], ''),
+      FeatureItem.adFree(proBullets[5], ''),
+    ];
+
+    appNavigatorKey.currentState?.push(
+      MaterialPageRoute(
+        builder: (_) => TryonLimitView(
+          badgeText: 'PREMIUM',
+          title: title,
+          subtitle: subtitle,
+          lottieAsset: 'assets/error.json',
+          features: features,
+          primaryCtaText: primaryCta,
+          onPrimary: () => appNavigatorKey.currentState?.pushReplacementNamed('/upgrade'),
+          secondaryCtaText: secondaryCta,
+          onSecondary: () => appNavigatorKey.currentState?.maybePop(),
+        ),
+      ),
+    );
+    return;
+  }
+
+  // 3) Hak varsa: ProcessingView'e geç — işi ProcessingView başlatacak (vm.submit)
+  if (mounted) {
+    setState(() => _submitting = false); // buton spinner'ını kapat
+    appNavigatorKey.currentState?.push(
+      MaterialPageRoute(builder: (_) => const ProcessingView()),
+    );
+  }
+}
+
 
         Widget actionsBar({
           required bool showBack,
@@ -70,39 +159,11 @@ class _TryOnWizardViewState extends State<TryOnWizardView> {
                   child: Text(tr('tryon.actions.next')),
                 ),
               if (showSubmit)
-                // TryOnWizardView -> actionsBar(showSubmit: true) bölümünde
                 FilledButtonLoading(
-                  loading: vm.state == TryonState.uploading || vm.state == TryonState.processing,
-                  // actionsBar içindeki onPressed
-onPressed: vm.canSubmitFromConfirm ? () async {
-  final qr = await vm.submitWithQuota(); // ⬅️ context parametresi yok
-
-  if (qr != null && !qr.allowed) {
-    final msgKey = switch (qr.code) {
-      'free_daily_exceeded'   => 'tryon.quota.errors.free_daily_exceeded',
-      'paid_monthly_exceeded' => 'tryon.quota.errors.paid_monthly_exceeded',
-      'no_session'            => 'tryon.quota.errors.no_session',
-      _                       => 'tryon.quota.errors.generic',
-    };
-    rootMessengerKey.currentState?.showSnackBar(SnackBar(content: Text(tr(msgKey))));
-
-    if (qr.plan == 'free') {
-      appNavigatorKey.currentState?.pushNamed('/profile'); // veya plan ekranınız
-    }
-    return;
-  }
-
-  // izin verildiyse ProcessingView’a geç
-  appNavigatorKey.currentState?.push(
-    MaterialPageRoute(builder: (_) => const ProcessingView()),
-  );
-} : null,
-
-
-
+                  loading: _submitting,
+                  onPressed: vm.canSubmitFromConfirm ? _handleTry : null,
                   child: Text(tr('tryon.actions.try')),
                 ),
-
             ],
           );
         }

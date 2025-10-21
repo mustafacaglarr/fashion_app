@@ -35,34 +35,33 @@ class FalFunctionsRepository implements IFalRepository {
     return 'data:$mime;base64,$b64';
   }
 
-  @override
-  Future<TryonResult> runTryOn(TryonRequest req) async {
-    final callable = _functions.httpsCallable('tryOn');
-    final resp = await callable.call({
-      'model': req.modelImageUrlOrDataUri,
-      'garment': req.garmentImageUrlOrDataUri,
-      'category': req.category.name,
-      'mode': req.mode.name,
-      'garmentPhotoType': req.garmentPhotoType,
-    });
+// lib/data/fal_repository.dart
+@override
+Future<TryonResult> runTryOn(TryonRequest req) async {
+  final callable = _functions.httpsCallable('tryOn');
 
-    final map = (resp.data as Map?) ?? const {};
-    final list = (map['images'] as List?) ?? const [];
+  // 🔒 Gizlilik: tüm alanları FAL şemasındaki "input" olarak ilet
+  final resp = await callable.call({
+    'input': req.toFalInputJson(),
+  });
 
-    if (list.isEmpty) {
-      // Function içinde de log var; burada da kısa bir izleme yapalım.
-      throw FirebaseFunctionsException(
-        code: 'unavailable',
-        message: 'Provider returned no images (normalized empty)',
-        details: map,
-      );
-    }
+  final map = (resp.data as Map?) ?? const {};
+  final list = (map['images'] as List?) ?? const [];
 
-    final out = list.map((e) {
-      final url = (e is Map) ? (e['url'] ?? e['image'] ?? '') : e.toString();
-      return TryonResultImage(url.toString());
-    }).toList();
-
-    return TryonResult(out);
+  if (list.isEmpty) {
+    throw FirebaseFunctionsException(
+      code: 'unavailable',
+      message: 'Provider returned no images (normalized empty)',
+      details: map,
+    );
   }
+
+  final out = list.map((e) {
+    final url = (e is Map) ? (e['url'] ?? e['image'] ?? '') : e.toString();
+    return TryonResultImage(url.toString());
+  }).toList();
+
+  return TryonResult(out);
+}
+
 }

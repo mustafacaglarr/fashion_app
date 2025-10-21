@@ -52,18 +52,10 @@ class TryonViewModel extends ChangeNotifier {
     if (x != null) { garmentPhoto = XFile(x.path); }
     state = TryonState.idle; notifyListeners();
   }
-Future<QuotaResult?> submitWithQuota() async {
+
+  // Sadece kotayı kontrol eder; state'i ERROR'a çekmez, iş başlatmaz.
+Future<QuotaResult> checkQuotaOnly() async {
   final qr = await quotaService.tryConsumeOne();
-
-  if (!qr.allowed) {
-    // VM içinde sadece sade bir teknik mesaj tut (UI i18n yapacak)
-    errorMessage = qr.code; // 'free_daily_exceeded' vs.
-    state = TryonState.error;
-    notifyListeners();
-    return qr;
-  }
-
-  await submit();
   return qr;
 }
 

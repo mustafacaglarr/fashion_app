@@ -133,6 +133,7 @@
       "confirm": "Confirm"
     },
       "quota": {
+    "cta_upgrade": "Try for €0.00", 
     "title": "You’ve reached your limit",
     "message_paid": "You’ve used all your monthly tries. You can upgrade your plan or try again when your quota resets.",
     "period": {
@@ -142,6 +143,7 @@
   "errors": {
     "no_session": "No active session.",
     "free_daily_exceeded": "Your daily trial limit is reached. Try again tomorrow or upgrade your plan.",
+    "title_free": "Your daily trial limit is reached.",
     "paid_monthly_exceeded": "Your monthly trial limit is reached. Upgrade your plan or wait for next month.",
     "generic": "You are not eligible to try right now."
   }
@@ -151,7 +153,8 @@
     "title": "Processing images…",
     "subtitle": "This may take a few seconds.",
     "missing_images": "Please select both images.",
-    "generic_error": "Something went wrong."
+    "generic_error": "Something went wrong.",
+    "note_waiting": "Starting the job… this may take a few seconds."
   },
    "result": {
     "title": "Results",
@@ -188,6 +191,7 @@
     "continue": "Continue",
     "delete": "Delete",
     "delete_permanently": "Delete Permanently",
+    "no_thanks": "No, thanks",
     "close": "Close"
   },
   "profile": {
