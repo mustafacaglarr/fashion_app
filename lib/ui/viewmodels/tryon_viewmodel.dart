@@ -80,6 +80,7 @@ Future<QuotaResult> checkQuotaOnly() async {
         numSamples: 1,
         segmentationFree: true,
         outputFormat: "png",
+        syncMode: true,
       );
 
       state = TryonState.processing; notifyListeners();

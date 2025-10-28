@@ -121,6 +121,25 @@
     "confirm": {
       "summary": { "category": "Kategori", "mode": "Mod", "photo_type": "Kıyafet Foto Tipi" }
     },
+      "error": {
+    "title": "Hay aksi! Bir sorun oluştu",
+    "subtitle": "İşlemi tamamlayamadık. Lütfen tekrar deneyin.",
+    "tips": {
+      "network": {
+        "0": "İnternet bağlantınızı kontrol edin (Wi-Fi/Veri).",
+        "1": "VPN/Proxy kullanıyorsanız kapatıp tekrar deneyin."
+      },
+      "format": {
+        "0": "Lütfen PNG veya JPEG formatında fotoğraf seçin (WEBP/HEIC desteklenmeyebilir).",
+        "1": "Fotoğraf çok büyükse yeniden seçin ya da daha küçük bir kopyasını kullanın."
+      },
+      "generic": {
+        "0": "İnternet bağlantınızı kontrol edin ve tekrar deneyin.",
+        "1": "PNG/JPEG formatında bir fotoğraf seçin."
+      }
+    }
+  },
+
     "category": { "auto": "Otomatik" ,"tops": "Üst giyim",
       "bottoms": "Alt giyim",
       "onePieces": "Tek parça"},
@@ -190,7 +209,9 @@
     "delete": "Sil",
     "delete_permanently": "Kalıcı Olarak Sil",
     "no_thanks": "Hayır Teşekkürler",
-    "close": "Kapat"
+    "close": "Kapat",
+    "retry": "Tekrar dene",
+    "home": "Ana sayfa"
   },
   "profile": {
     "title": "Profil",
@@ -451,9 +472,8 @@
         "0": "200 sonuç/ay",
         "1": "Gölge & kırışıklık realistik",
         "2": "Sınırsız beden/renk karşılaştırması",
-        "3": "Ticari lisans · 5 ekip üyesi",
-        "4": "Reklam yok",
-        "5": "Öncelikli canlı destek"
+        "3": "Reklam yok",
+        "4": "Öncelikli canlı destek"
       }
     },
     "actions": {

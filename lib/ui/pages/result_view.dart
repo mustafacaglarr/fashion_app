@@ -1,8 +1,9 @@
 // lib/ui/pages/result_view.dart
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:easy_localization/easy_localization.dart';          // ⬅️ i18n
-                 // ⬅️ Paylaşım
+import 'package:easy_localization/easy_localization.dart';
 
 import 'package:fashion_app/ui/viewmodels/tryon_viewmodel.dart';
 import 'package:fashion_app/ui/viewmodels/history_viewmodel.dart';
@@ -32,6 +33,19 @@ class _ResultViewState extends State<ResultView> {
       MaterialPageRoute(builder: (_) => const LandingView()),
       (route) => false,
     );
+  }
+
+  /// data:image/...;base64,... -> bytes
+  Uint8List? _bytesFromDataUri(String? dataUri) {
+    if (dataUri == null || dataUri.isEmpty) return null;
+    try {
+      final uri = Uri.parse(dataUri);
+      if (uri.data != null) return uri.data!.contentAsBytes();
+      final b64 = dataUri.split(',').last;
+      return base64Decode(b64);
+    } catch (_) {
+      return null;
+    }
   }
 
   @override
@@ -66,14 +80,33 @@ class _ResultViewState extends State<ResultView> {
                           separatorBuilder: (_, __) => const SizedBox(height: 24),
                           itemBuilder: (_, i) {
                             final url = vm.results[i].url;
+                            final isDataUri = url.startsWith('data:image');
+
                             return Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
                                 ClipRRect(
                                   borderRadius: BorderRadius.circular(16),
                                   child: AspectRatio(
-                                    aspectRatio: 864 / 1296,
-                                    child: Image.network(url, fit: BoxFit.cover),
+                                    aspectRatio: 864 / 1296, // 2:3
+                                    child: isDataUri
+                                        ? Builder(
+                                            builder: (_) {
+                                              final bytes = _bytesFromDataUri(url);
+                                              if (bytes == null) {
+                                                return const Center(
+                                                  child: Text('Görsel çözülemedi'),
+                                                );
+                                              }
+                                              return Image.memory(
+                                                bytes,
+                                                fit: BoxFit.cover,
+                                                gaplessPlayback: true,
+                                                filterQuality: FilterQuality.high,
+                                              );
+                                            },
+                                          )
+                                        : Image.network(url, fit: BoxFit.cover),
                                   ),
                                 ),
                                 const SizedBox(height: 12),
@@ -93,6 +126,9 @@ class _ResultViewState extends State<ResultView> {
                                   onPressed: () async {
                                     final hist = context.read<HistoryViewModel>();
                                     try {
+                                      // Mevcut mantığı koruyoruz:
+                                      // HTTP(S) URL ise olduğu gibi kaydet, data URI ise
+                                      // HistoryViewModel'in data URI destekli saveFromUrl'ü varsa o çalışır.
                                       await hist.saveFromUrl(url);
                                       if (mounted) _showBanner(tr('result.banner.saved'));
                                     } catch (_) {

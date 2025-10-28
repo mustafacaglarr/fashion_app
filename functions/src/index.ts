@@ -70,6 +70,7 @@ async function queueRequest(
       num_samples: 1,
       segmentation_free: true,
       output_format: "png",
+      sync_mode: true,
     }),
   });
 

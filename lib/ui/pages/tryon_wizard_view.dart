@@ -1,15 +1,14 @@
 import 'package:fashion_app/app_keys.dart';
 import 'package:fashion_app/ui/pages/processing_view.dart';
-// ⬇️ Eski: tryon_error_view.dart yerine modern upsell ekranı
 import 'package:fashion_app/ui/pages/tryon_limit_view.dart';
-
+import 'package:fashion_app/ui/pages/tryon_error_view.dart';
 import 'package:fashion_app/ui/viewmodels/tryon_viewmodel.dart';
 import 'package:fashion_app/ui/widgets/filled_button_loading.dart';
 import 'package:fashion_app/ui/widgets/image_pick_card.dart';
 import 'package:fashion_app/ui/widgets/step_header.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:easy_localization/easy_localization.dart'; // ⬅️ i18n
+import 'package:easy_localization/easy_localization.dart';
 import '../../../data/tryon_models.dart';
 
 class TryOnWizardView extends StatefulWidget {
@@ -29,6 +28,7 @@ class TryOnWizardView extends StatefulWidget {
 
 class _TryOnWizardViewState extends State<TryOnWizardView> {
   bool _submitting = false;
+  bool _errorPushed = false;
 
   @override
   void initState() {
@@ -43,102 +43,179 @@ class _TryOnWizardViewState extends State<TryOnWizardView> {
     return (v == key) ? fallback : v;
   }
 
+ // Hata mesajını kullanıcı dostu ipuçlarına çevir (i18n)
+List<String> _buildUserTips(String? err) {
+  final tips = <String>[];
+  final s = (err ?? '').toLowerCase();
+
+  final isNetwork = s.contains('socketexception') ||
+      s.contains('failed host lookup') ||
+      s.contains('network') ||
+      (s.contains('http') && s.contains('timeout'));
+
+  final isInvalidImage = s.contains('invalid image') ||
+      s.contains('expecting a valid url or base64') ||
+      s.contains('unsupported') ||
+      s.contains('webp') ||
+      s.contains('heic') ||
+      s.contains('image data');
+
+  if (isNetwork) {
+    tips.addAll([
+      _trOr('tryon.error.tips.network.0', 'İnternet bağlantınızı kontrol edin (Wi-Fi/Veri).'),
+      _trOr('tryon.error.tips.network.1', 'VPN/Proxy kullanıyorsanız kapatıp tekrar deneyin.'),
+    ]);
+  }
+
+  if (isInvalidImage) {
+    tips.addAll([
+      _trOr('tryon.error.tips.format.0', 'Lütfen PNG veya JPEG formatında fotoğraf seçin (WEBP/HEIC desteklenmeyebilir).'),
+      _trOr('tryon.error.tips.format.1', 'Fotoğraf çok büyükse yeniden seçin ya da daha küçük bir kopyasını kullanın.'),
+    ]);
+  }
+
+  if (tips.isEmpty) {
+    tips.addAll([
+      _trOr('tryon.error.tips.generic.0', 'İnternet bağlantınızı kontrol edin ve tekrar deneyin.'),
+      _trOr('tryon.error.tips.generic.1', 'PNG/JPEG formatında bir fotoğraf seçin.'),
+    ]);
+  }
+
+  return tips;
+}
+
+
+  // Hata oluştuysa kullanıcıyı error sayfasına yönlendir
+  void _maybeOpenError(TryonViewModel vm) {
+    if (_errorPushed || vm.state != TryonState.error) return;
+    _errorPushed = true;
+
+    // ham hatayı sadece logla (kullanıcıya gösterme)
+    if (vm.errorMessage != null && vm.errorMessage!.isNotEmpty) {
+      // ignore: avoid_print
+      print('TryOn error: ${vm.errorMessage}');
+      // TODO: Crashlytics vb. varsa burada kaydedebilirsiniz.
+    }
+
+    final tips = _buildUserTips(vm.errorMessage);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      appNavigatorKey.currentState?.push(
+        MaterialPageRoute(
+          builder: (_) => TryonErrorView(
+            title: _trOr('tryon.error.title', 'Hay aksi! Bir sorun oluştu'),
+            subtitle: _trOr('tryon.error.subtitle',
+                'İşlemi tamamlayamadık. Lütfen tekrar deneyin.'),
+            tips: tips, // ✅ kullanıcıya ipuçlarını göster
+            onRetry: () {
+              // hata durumunu sıfırla ve geri dön
+              vm.errorMessage = null;
+              vm.state = TryonState.idle;
+              vm.notifyListeners();
+              appNavigatorKey.currentState?.maybePop();
+              _errorPushed = false;
+            },
+          ),
+        ),
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<TryonViewModel>(
       builder: (context, vm, _) {
         final theme = Theme.of(context);
 
+        // Hata yakalama/redirect
+        _maybeOpenError(vm);
+
         String catLabel(GarmentCategory c) => _trOr('tryon.category.${c.name}', c.name);
         String modeLabel(TryonMode m) => _trOr('tryon.mode.${m.name}', m.name);
         String photoTypeLabel(String v) => _trOr('tryon.photoType.$v', v);
 
         Future<void> _handleTry() async {
-  if (!vm.canSubmitFromConfirm || _submitting) return;
-  setState(() => _submitting = true);
+          if (!vm.canSubmitFromConfirm || _submitting) return;
+          setState(() => _submitting = true);
 
-  // 1) Sadece hak/limit KONTROLÜ (işi başlatma!)
-  final qr = await vm.checkQuotaOnly();
+          // 1) kota kontrolü
+          final qr = await vm.checkQuotaOnly();
 
-  // 2) Limit yoksa: upsell ekranı
-  if (!qr.allowed) {
-    setState(() => _submitting = false);
+          // 2) yetmiyorsa upsell
+          if (!qr.allowed) {
+            setState(() => _submitting = false);
+            final isFree = qr.plan == 'free';
+            final title = isFree
+                ? _trOr('tryon.quota.errors.title_free', 'Günlük hakkın doldu')
+                : _trOr('tryon.quota.errors.title_paid', 'Plan limitin doldu');
 
-    final isFree = qr.plan == 'free';
+            final msgKey = switch (qr.code) {
+              'free_daily_exceeded'   => 'tryon.quota.errors.free_daily_exceeded',
+              'paid_monthly_exceeded' => 'tryon.quota.errors.paid_monthly_exceeded',
+              'no_session'            => 'tryon.quota.errors.no_session',
+              _                       => 'tryon.quota.errors.generic',
+            };
 
-    final title = isFree
-        ? _trOr('tryon.quota.errors.title_free', 'Günlük hakkın doldu')
-        : _trOr('tryon.quota.errors.title_paid', 'Plan limitin doldu');
+            final subtitle = _trOr(
+              msgKey,
+              isFree
+                  ? 'Daha fazla deneme için Süper’e geçebilirsin.'
+                  : 'Limitini artırmak için planını yönet.',
+            );
 
-    final msgKey = switch (qr.code) {
-      'free_daily_exceeded'   => 'tryon.quota.errors.free_daily_exceeded',
-      'paid_monthly_exceeded' => 'tryon.quota.errors.paid_monthly_exceeded',
-      'no_session'            => 'tryon.quota.errors.no_session',
-      _                       => 'tryon.quota.errors.generic',
-    };
+            final primaryCta = isFree
+                ? _trOr('tryon.quota.cta_upgrade', '₺0,00 ÖDEYEREK DENE')
+                : _trOr('tryon.quota.cta_manage', 'PLANI YÖNET');
 
-    final subtitle = _trOr(
-      msgKey,
-      isFree
-          ? 'Daha fazla deneme için Süper’e geçebilirsin.'
-          : 'Limitini artırmak için planını yönet.',
-    );
+            final secondaryCta = _trOr('common.no_thanks', 'HAYIR TEŞEKKÜRLER');
 
-    final primaryCta = isFree
-        ? _trOr('tryon.quota.cta_upgrade', '₺0,00 ÖDEYEREK DENE')
-        : _trOr('tryon.quota.cta_manage', 'PLANI YÖNET');
+            const defaults = <String>[
+              '100 results/month',
+              'HD resolution',
+              'Lighting/skin tone matching (color match)',
+              'Pose normalization (alignment)',
+              'No watermark · Fast queue',
+              'No ads',
+            ];
+            final proBullets = List<String>.generate(
+              defaults.length, (i) => _trOr('plans.pro.bullets.$i', defaults[i]),
+            );
 
-    final secondaryCta = _trOr('common.no_thanks', 'HAYIR TEŞEKKÜRLER');
+            final features = <FeatureItem>[
+              FeatureItem.infinityIcon(proBullets[0], ''),
+              FeatureItem.refresh(proBullets[1], ''),
+              FeatureItem.refresh(proBullets[2], ''),
+              FeatureItem.headphones(proBullets[3], ''),
+              FeatureItem.infinityIcon(proBullets[4], ''),
+              FeatureItem.adFree(proBullets[5], ''),
+            ];
 
-    const defaults = <String>[
-      '100 results/month',
-      'HD resolution',
-      'Lighting/skin tone matching (color match)',
-      'Pose normalization (alignment)',
-      'No watermark · Fast queue',
-      'No ads',
-    ];
-    final proBullets = List<String>.generate(
-      defaults.length,
-      (i) => _trOr('plans.pro.bullets.$i', defaults[i]),
-    );
+            appNavigatorKey.currentState?.push(
+              MaterialPageRoute(
+                builder: (_) => TryonLimitView(
+                  badgeText: 'PREMIUM',
+                  title: title,
+                  subtitle: subtitle,
+                  lottieAsset: 'assets/error.json',
+                  features: features,
+                  primaryCtaText: primaryCta,
+                  onPrimary: () => appNavigatorKey.currentState?.pushReplacementNamed('/upgrade'),
+                  secondaryCtaText: secondaryCta,
+                  onSecondary: () => appNavigatorKey.currentState?.maybePop(),
+                ),
+              ),
+            );
+            return;
+          }
 
-    final features = <FeatureItem>[
-      FeatureItem.infinityIcon(proBullets[0], ''),
-      FeatureItem.refresh(proBullets[1], ''),
-      FeatureItem.refresh(proBullets[2], ''),
-      FeatureItem.headphones(proBullets[3], ''),
-      FeatureItem.infinityIcon(proBullets[4], ''),
-      FeatureItem.adFree(proBullets[5], ''),
-    ];
-
-    appNavigatorKey.currentState?.push(
-      MaterialPageRoute(
-        builder: (_) => TryonLimitView(
-          badgeText: 'PREMIUM',
-          title: title,
-          subtitle: subtitle,
-          lottieAsset: 'assets/error.json',
-          features: features,
-          primaryCtaText: primaryCta,
-          onPrimary: () => appNavigatorKey.currentState?.pushReplacementNamed('/upgrade'),
-          secondaryCtaText: secondaryCta,
-          onSecondary: () => appNavigatorKey.currentState?.maybePop(),
-        ),
-      ),
-    );
-    return;
-  }
-
-  // 3) Hak varsa: ProcessingView'e geç — işi ProcessingView başlatacak (vm.submit)
-  if (mounted) {
-    setState(() => _submitting = false); // buton spinner'ını kapat
-    appNavigatorKey.currentState?.push(
-      MaterialPageRoute(builder: (_) => const ProcessingView()),
-    );
-  }
-}
-
+          // 3) hak varsa processing'e
+          if (mounted) {
+            setState(() => _submitting = false);
+            appNavigatorKey.currentState?.push(
+              MaterialPageRoute(builder: (_) => const ProcessingView()),
+            );
+          }
+        }
 
         Widget actionsBar({
           required bool showBack,
@@ -290,10 +367,7 @@ class _TryOnWizardViewState extends State<TryOnWizardView> {
                 StepHeader(currentIndex: stepIndex(vm.step)),
                 const SizedBox(height: 12),
                 stepBody(),
-                if (vm.state == TryonState.error && (vm.errorMessage?.isNotEmpty ?? false)) ...[
-                  const SizedBox(height: 8),
-                  Text(vm.errorMessage!, style: TextStyle(color: theme.colorScheme.error)),
-                ],
+                // ❗ Inline hata YOK — hata olursa TryonErrorView açılıyor.
               ],
             ),
           ),

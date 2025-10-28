@@ -123,6 +123,25 @@
     "confirm": {
       "summary": { "category": "Category", "mode": "Mode", "photo_type": "Clothing Photo Type" }
     },
+     "error": {
+      "title": "Whoops! Something went wrong",
+      "subtitle": "We couldn’t complete the process. Please try again.",
+      "tips": {
+        "network": {
+          "0": "Check your internet connection (Wi-Fi/Data).",
+          "1": "If you use a VPN/Proxy, disable it and try again."
+        },
+        "format": {
+          "0": "Please pick a PNG or JPEG photo (WEBP/HEIC may not be supported).",
+          "1": "If the photo is too large, pick a smaller one."
+        },
+        "generic": {
+          "0": "Check your connection and try again.",
+          "1": "Select a PNG/JPEG photo."
+        }
+      }
+    },
+    
     "category": { "auto": "Auto","tops": "Tops",
       "bottoms": "Bottoms",
       "onePieces": "One-pieces"},
@@ -192,7 +211,9 @@
     "delete": "Delete",
     "delete_permanently": "Delete Permanently",
     "no_thanks": "No, thanks",
-    "close": "Close"
+    "close": "Close",
+    "retry": "Try again",
+    "home": "Home"
   },
   "profile": {
     "title": "Profile",
@@ -457,9 +478,8 @@
         "0": "200 results/month",
         "1": "Realistic shadows & wrinkles",
         "2": "Unlimited size/color comparisons",
-        "3": "Commercial license · 5 team members",
-        "4": "No ads",
-        "5": "Priority live support"
+        "3": "No ads",
+        "4": "Priority live support"
       }
     },
 
