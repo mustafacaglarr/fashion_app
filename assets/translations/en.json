@@ -61,6 +61,7 @@
       "history": {
         "title": "Browse History",
         "subtitle": "Revisit what you've tried"
+        
       },
       "favorites": {
         "title": "Favorites",
@@ -109,6 +110,13 @@
       "subtitle": "Clear face & torso, plain background",
       "tip": "Tip: Single person, good lighting, plain background gives best results."
     },
+    "unsupported": {
+  "title": "This photo format isn’t supported",
+  "desc": "Please select a photo in PNG or JPG/JPEG format. WEBP/HEIC may not be supported at this time.",
+  "pick_again": "Choose another photo",
+  "inline": "This photo format isn’t supported. Please pick PNG or JPG."
+},
+
     "mode": {
     "balanced": "Balanced",
     "quality": "Quality",
@@ -197,6 +205,8 @@
     "clear_all": "Clear all",
     "clear": "Clear",
     "empty": "No saved items yet.",
+    "saved_to_gallery": "Saved to Gallery",
+    "save_failed": "Could not save",
     "dialog": {
       "clear_title": "Clear history?",
       "clear_content": "All saved images will be deleted."

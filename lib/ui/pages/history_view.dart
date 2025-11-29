@@ -1,12 +1,32 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:easy_localization/easy_localization.dart';      // ⬅️ eklendi
+import 'package:easy_localization/easy_localization.dart';
 import '../../data/history_item.dart';
 import '../viewmodels/history_viewmodel.dart';
 
-class HistoryView extends StatelessWidget {
+class HistoryView extends StatefulWidget {
   const HistoryView({super.key});
+
+  @override
+  State<HistoryView> createState() => _HistoryViewState();
+}
+
+class _HistoryViewState extends State<HistoryView> {
+  bool _loadedOnce = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // sayfa ilk açıldığında bir kez yükle
+    // (Provider hazır olduğunda çağırmak için microtask)
+    Future.microtask(() {
+      if (!_loadedOnce && mounted) {
+        context.read<HistoryViewModel>().load();
+        _loadedOnce = true;
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,14 +67,21 @@ class HistoryView extends StatelessWidget {
           HistoryState.error => Center(child: Text(vm.error ?? tr('errors.generic'))),
           _ => vm.items.isEmpty
               ? Center(child: Text(tr('history.empty')))
-              : Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: GridView.builder(
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2, crossAxisSpacing: 12, mainAxisSpacing: 12, childAspectRatio: 3 / 4,
+              : RefreshIndicator(
+                  onRefresh: vm.load,
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: GridView.builder(
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                        childAspectRatio: 3 / 4,
+                      ),
+                      itemCount: vm.items.length,
+                      itemBuilder: (_, i) =>
+                          _HistoryTile(item: vm.items[i], onDelete: () => vm.remove(i)),
                     ),
-                    itemCount: vm.items.length,
-                    itemBuilder: (_, i) => _HistoryTile(item: vm.items[i], onDelete: () => vm.remove(i)),
                   ),
                 ),
         },

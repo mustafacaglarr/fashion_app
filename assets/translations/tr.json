@@ -59,7 +59,9 @@
       },
       "history": {
         "title": "Geçmişini İncele",
-        "subtitle": "Daha önce denediklerine tekrar göz at"
+        "subtitle": "Daha önce denediklerine tekrar göz at",
+        "saved_to_gallery": "Galeriye kaydedildi",
+        "save_failed": "Kaydedilemedi"
       },
       "favorites": {
         "title": "Favorilerin",
@@ -107,6 +109,12 @@
       "subtitle": "Yüz & gövde net, sade arka plan",
       "tip": "İpucu: Tek kişi, iyi ışık ve sade arka plan en iyi sonucu verir."
     },
+     "unsupported": {
+    "title": "Bu fotoğraf türü desteklenmiyor",
+    "desc": "Lütfen PNG ya da JPG/JPEG formatında bir fotoğraf seçin. WEBP/HEIC şu anda desteklenmeyebilir.",
+    "pick_again": "Başka fotoğraf seç",
+    "inline": "Bu fotoğraf türü desteklenmiyor. PNG veya JPG seçin."
+  },
     "mode": {
     "balanced": "Dengeli",
     "quality": "Kalite",

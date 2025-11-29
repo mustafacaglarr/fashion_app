@@ -6,7 +6,7 @@ class AboutView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const version = '1.0.0';
+    const version = '1.0.18';
 
     return Scaffold(
       appBar: AppBar(title: Text(tr('about.title'))),

@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:easy_localization/easy_localization.dart';
 
-import '../../../services/auth_service.dart'; // Plan.basic için
+import '../../../services/auth_service.dart'; // Plan.free için
 import '../../viewmodels/auth_viewmodel.dart';
+import '../landing_view.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -20,7 +21,7 @@ class _RegisterViewState extends State<RegisterView> {
   final _password = TextEditingController();
   bool _obscure = true;
 
-  String? _error; // hata mesajı
+  String? _error; // üstte gösterilecek hata mesajı
 
   @override
   void dispose() {
@@ -28,6 +29,29 @@ class _RegisterViewState extends State<RegisterView> {
     _email.dispose();
     _password.dispose();
     super.dispose();
+  }
+
+  void _goHome() {
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const LandingView()),
+      (route) => false,
+    );
+  }
+
+  String _mapRegisterError(String? codeOrMsg) {
+    final s = (codeOrMsg ?? '').toLowerCase();
+    if (s.contains('email-already-in-use')) {
+      return tr('errors.email_in_use');
+    }
+    return tr('errors.register_generic');
+  }
+
+  String _mapGoogleError(String? codeOrMsg) {
+    final s = (codeOrMsg ?? '').toLowerCase();
+    if (s.contains('account-exists-with-different-credential')) {
+      return tr('errors.register_generic');
+    }
+    return tr('errors.register_generic');
   }
 
   @override
@@ -52,7 +76,7 @@ class _RegisterViewState extends State<RegisterView> {
             ),
             const SizedBox(height: 18),
 
-            if (_error != null) ...[
+            if (_error != null)
               Container(
                 padding: const EdgeInsets.all(12),
                 margin: const EdgeInsets.only(bottom: 12),
@@ -77,7 +101,6 @@ class _RegisterViewState extends State<RegisterView> {
                   ],
                 ),
               ),
-            ],
 
             Form(
               key: _form,
@@ -89,9 +112,8 @@ class _RegisterViewState extends State<RegisterView> {
                       labelText: tr('auth.full_name'),
                       prefixIcon: const Icon(Icons.person_outline),
                     ),
-                    validator: (v) => (v == null || v.trim().length < 2)
-                        ? tr('errors.name_required')
-                        : null,
+                    validator: (v) =>
+                        (v == null || v.trim().length < 2) ? tr('errors.name_required') : null,
                   ),
                   const SizedBox(height: 12),
 
@@ -130,21 +152,24 @@ class _RegisterViewState extends State<RegisterView> {
                           ? null
                           : () async {
                               if (!_form.currentState!.validate()) return;
-                              final ok = await vm.register(
+                              FocusScope.of(context).unfocus();
+                              setState(() => _error = null);
+
+                              // register() Future<void> dahi olsa sorun yok:
+                              await vm.register(
                                 name: _name.text.trim(),
                                 email: _email.text.trim(),
                                 password: _password.text.trim(),
                                 plan: Plan.free,
                               );
 
-                              if (!ok && mounted) {
-                                final code = vm.error ?? '';
-                                final msg = code.contains('email-already-in-use')
-                                    ? tr('errors.email_in_use')
-                                    : tr('errors.register_generic');
-                                setState(() => _error = msg);
+                              if (!mounted) return;
+
+                              // Başarı: vm.error == null
+                              if (vm.error == null) {
+                                _goHome();
                               } else {
-                                if (mounted) Navigator.pop(context);
+                                setState(() => _error = _mapRegisterError(vm.error));
                               }
                             },
                       child: vm.isBusy
@@ -166,7 +191,7 @@ class _RegisterViewState extends State<RegisterView> {
                     children: [
                       Text(tr('auth.already_member')),
                       TextButton(
-                        onPressed: () => Navigator.pop(context),
+                        onPressed: vm.isBusy ? null : () => Navigator.pop(context),
                         child: Text(tr('auth.sign_in')),
                       ),
                     ],
@@ -176,7 +201,23 @@ class _RegisterViewState extends State<RegisterView> {
                   OutlinedButton.icon(
                     icon: Image.asset('assets/google.png', height: 20),
                     label: Text(tr('auth.register_with_google')),
-                    onPressed: vm.isBusy ? null : () => vm.loginWithGoogle(planHint: Plan.basic),
+                    onPressed: vm.isBusy
+                        ? null
+                        : () async {
+                            FocusScope.of(context).unfocus();
+                            setState(() => _error = null);
+
+                            // loginWithGoogle() Future<void> ise:
+                            await vm.loginWithGoogle(planHint: Plan.free);
+
+                            if (!mounted) return;
+
+                            if (vm.error == null) {
+                              _goHome();
+                            } else {
+                              setState(() => _error = _mapGoogleError(vm.error));
+                            }
+                          },
                   ),
                 ],
               ),

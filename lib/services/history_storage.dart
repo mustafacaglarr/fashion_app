@@ -1,6 +1,6 @@
-// lib/ui/storage/history_storage.dart
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -25,7 +25,59 @@ class HistoryStorage {
     return dir;
   }
 
-  /// Dışa kapalı: Baytları diske yazıp HistoryItem oluşturur ve persist eder.
+  /// ---- Public API ----
+  /// URL (http/https) **veya** data URI (data:image/...) kabul eder.
+  static Future<HistoryItem> saveFromUrl(String input,
+      {required String userKey}) async {
+    if (input.startsWith('data:')) {
+      return _saveFromDataUri(input, userKey: userKey);
+    }
+    return _saveFromHttp(input, userKey: userKey);
+  }
+
+  static Future<List<HistoryItem>> loadAll(String userKey) async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getStringList(_prefsKeyFor(userKey)) ?? <String>[];
+    return raw
+        .map((s) => HistoryItem.fromJson(jsonDecode(s) as Map<String, dynamic>))
+        .toList();
+  }
+
+  static Future<void> removeAt(int index, {required String userKey}) async {
+    final list = await loadAll(userKey);
+    if (index < 0 || index >= list.length) return;
+    final item = list.removeAt(index);
+    try {
+      final f = File(item.path);
+      if (await f.exists()) {
+        await f.delete();
+      }
+    } catch (_) {}
+    await _persist(list, userKey);
+  }
+
+  static Future<void> clearAll(String userKey) async {
+    final prefs = await SharedPreferences.getInstance();
+    final list = await loadAll(userKey);
+    for (final it in list) {
+      try {
+        final f = File(it.path);
+        if (await f.exists()) {
+          await f.delete();
+        }
+      } catch (_) {}
+    }
+    await prefs.remove(_prefsKeyFor(userKey));
+    try {
+      final dir = await _userDir(userKey);
+      if (await dir.exists()) {
+        await dir.delete(recursive: true);
+      }
+    } catch (_) {}
+  }
+
+  /// ---- İç işler ----
+
   static Future<HistoryItem> _saveBytes({
     required List<int> bytes,
     required String userKey,
@@ -33,9 +85,9 @@ class HistoryStorage {
   }) async {
     final dir = await _userDir(userKey);
     final fileName =
-        'tryon_${DateTime.now().millisecondsSinceEpoch}.${extension.toLowerCase()}';
+        'tryon_${DateTime.now().microsecondsSinceEpoch}.${extension.toLowerCase()}';
     final file = File('${dir.path}/$fileName');
-    await file.writeAsBytes(bytes);
+    await file.writeAsBytes(bytes, flush: true);
 
     final item = HistoryItem(path: file.path, savedAt: DateTime.now());
     final list = await loadAll(userKey);
@@ -44,32 +96,19 @@ class HistoryStorage {
     return item;
   }
 
-  /// URL'den indirip (veya data URI'den decode edip) kullanıcının klasörüne kaydeder.
-  /// Hem http(s) hem de data: şemasını destekler.
-  static Future<HistoryItem> saveFromUrl(String url, {required String userKey}) async {
-    if (url.startsWith('data:')) {
-      // DATA URI (örn: data:image/png;base64,....)
-      return _saveFromDataUri(url, userKey: userKey);
-    }
-    // HTTP(S)
-    return _saveFromHttp(url, userKey: userKey);
-  }
-
-  /// DATA URI (base64) kaydetme
-  static Future<HistoryItem> _saveFromDataUri(String dataUri, {required String userKey}) async {
+  static Future<HistoryItem> _saveFromDataUri(String dataUri,
+      {required String userKey}) async {
     try {
       final uri = Uri.parse(dataUri);
-
-      // contentAsBytes() hem base64 hem de percent-encode için çalışır
-      final bytes = uri.data?.contentAsBytes() ??
+      final Uint8List bytes = uri.data?.contentAsBytes() ??
           base64Decode(dataUri.split(',').last);
-
       if (bytes.isEmpty) {
-        throw Exception('Data URI çözülemedi (boş veri).');
+        throw Exception('Boş data URI.');
       }
 
-      final mime = uri.data?.mimeType ?? _mimeFromDataUri(dataUri) ?? 'image/png';
-      final ext = _extFromMime(mime) ?? 'png'; // <-- NULL OLMAYACAK
+      final mime = uri.data?.mimeType ?? _mimeFromDataUri(dataUri);
+      // MIME yoksa baytlardan yakalamayı dene
+      final ext = _extFromMime(mime) ?? _detectExtFromBytes(bytes) ?? 'png';
 
       return _saveBytes(bytes: bytes, userKey: userKey, extension: ext);
     } catch (e) {
@@ -77,24 +116,23 @@ class HistoryStorage {
     }
   }
 
-  /// HTTP(S) kaydetme
-  static Future<HistoryItem> _saveFromHttp(String url, {required String userKey}) async {
+  static Future<HistoryItem> _saveFromHttp(String url,
+      {required String userKey}) async {
     http.Response res;
     try {
       res = await http.get(Uri.parse(url)).timeout(const Duration(seconds: 30));
     } catch (e) {
       throw Exception('Görsel indirilemedi (ağ/timeout): $e');
     }
-
     if (res.statusCode != 200) {
       throw Exception('Görsel indirilemedi (HTTP ${res.statusCode}).');
     }
 
-    // İçerik tipinden ya da URL uzantısından uygun dosya uzantısı
     final headerMime = res.headers['content-type'];
     final extFromMime = _extFromMime(headerMime);
     final extFromUrl = _extFromUrl(url);
-    final ext = extFromMime ?? extFromUrl ?? 'jpg'; // <-- NULL OLMAYACAK
+    final extFromBytes = _detectExtFromBytes(res.bodyBytes);
+    final ext = extFromMime ?? extFromUrl ?? extFromBytes ?? 'jpg';
 
     return _saveBytes(bytes: res.bodyBytes, userKey: userKey, extension: ext);
   }
@@ -122,7 +160,7 @@ class HistoryStorage {
       case 'image/tiff':
         return 'tiff';
       default:
-        return null; // bilinmeyen mime -> null
+        return null;
     }
   }
 
@@ -143,62 +181,46 @@ class HistoryStorage {
       if (dot <= 0 || dot == last.length - 1) return null;
 
       var ext = last.substring(dot + 1).toLowerCase();
-      if (ext.contains('%')) {
-        // bazen encoded olabiliyor
-        ext = Uri.decodeComponent(ext);
-      }
+      if (ext.contains('%')) ext = Uri.decodeComponent(ext);
       if (ext == 'jpeg') ext = 'jpg';
-      if (ext.length > 5) return null; // çok uzun/garip uzantıları filtrele
+      if (ext.length > 5) return null;
       return ext;
     } catch (_) {
       return null;
     }
   }
 
-  /// Kayıtlı tüm öğeleri oku
-  static Future<List<HistoryItem>> loadAll(String userKey) async {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getStringList(_prefsKeyFor(userKey)) ?? <String>[];
-    return raw
-        .map((s) => HistoryItem.fromJson(jsonDecode(s) as Map<String, dynamic>))
-        .toList();
-  }
-
-  /// Belirli index’i sil (dosyayla birlikte) ve persist et
-  static Future<void> removeAt(int index, {required String userKey}) async {
-    final list = await loadAll(userKey);
-    if (index < 0 || index >= list.length) return;
-    final item = list.removeAt(index);
-    try {
-      final f = File(item.path);
-      if (await f.exists()) {
-        await f.delete();
-      }
-    } catch (_) {}
-    await _persist(list, userKey);
-  }
-
-  /// Tüm geçmişi temizle (dosyalar + kayıt)
-  static Future<void> clearAll(String userKey) async {
-    final prefs = await SharedPreferences.getInstance();
-    final list = await loadAll(userKey);
-    for (final it in list) {
-      try {
-        final f = File(it.path);
-        if (await f.exists()) {
-          await f.delete();
-        }
-      } catch (_) {}
-    }
-    await prefs.remove(_prefsKeyFor(userKey));
-
-    // İsteğe bağlı: o kullanıcıya ait klasörü de temizle
-    try {
-      final dir = await _userDir(userKey);
-      if (await dir.exists()) {
-        await dir.delete(recursive: true);
-      }
-    } catch (_) {}
+  /// Baytlardan format tespiti (magic numbers)
+  static String? _detectExtFromBytes(List<int> bytes) {
+    if (bytes.length < 12) return null;
+    // JPG: FF D8 FF
+    if (bytes[0] == 0xFF && bytes[1] == 0xD8 && bytes[2] == 0xFF) return 'jpg';
+    // PNG: 89 50 4E 47
+    if (bytes[0] == 0x89 &&
+        bytes[1] == 0x50 &&
+        bytes[2] == 0x4E &&
+        bytes[3] == 0x47) return 'png';
+    // GIF: "GIF87a" / "GIF89a"
+    if (bytes[0] == 0x47 &&
+        bytes[1] == 0x49 &&
+        bytes[2] == 0x46) return 'gif';
+    // WEBP: "RIFF....WEBP"
+    if (bytes[0] == 0x52 &&
+        bytes[1] == 0x49 &&
+        bytes[2] == 0x46 &&
+        bytes[3] == 0x46 &&
+        bytes[8] == 0x57 &&
+        bytes[9] == 0x45 &&
+        bytes[10] == 0x42 &&
+        bytes[11] == 0x50) return 'webp';
+    // BMP: 'B' 'M'
+    if (bytes[0] == 0x42 && bytes[1] == 0x4D) return 'bmp';
+    // HEIC/HEIF: ftypheic / ftypheif / ftypmif1 vs.
+    final header = utf8.decode(bytes.sublist(4, 12), allowMalformed: true);
+    if (header.contains('ftypheic') ||
+        header.contains('ftypheif') ||
+        header.contains('ftypmif1')) return 'heic';
+    return null;
   }
 
   static Future<void> _persist(List<HistoryItem> items, String userKey) async {

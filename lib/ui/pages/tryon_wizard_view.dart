@@ -1,3 +1,4 @@
+// lib/ui/pages/tryon_wizard_view.dart
 import 'package:fashion_app/app_keys.dart';
 import 'package:fashion_app/ui/pages/processing_view.dart';
 import 'package:fashion_app/ui/pages/tryon_limit_view.dart';
@@ -30,6 +31,100 @@ class _TryOnWizardViewState extends State<TryOnWizardView> {
   bool _submitting = false;
   bool _errorPushed = false;
 
+  // ---- Yeni: destekli uzantı kontrolü
+  static const _okExts = {'jpg', 'jpeg', 'png'};
+  bool _isSupportedPath(String? path) {
+    if (path == null || path.isEmpty) return true; // henüz seçilmemişse engelleme
+    final dot = path.lastIndexOf('.');
+    if (dot < 0 || dot == path.length - 1) return false;
+    final ext = path.substring(dot + 1).toLowerCase();
+    return _okExts.contains(ext);
+  }
+
+  // ---- Yeni: modern uyarı sayfası (bottom sheet)
+  Future<void> _showUnsupportedSheet({
+    required bool forModel, // true: model foto, false: kıyafet
+    required TryonViewModel vm,
+  }) async {
+    final theme = Theme.of(context);
+    final title = _trOr('tryon.unsupported.title', 'Bu fotoğraf türü desteklenmiyor');
+    final desc  = _trOr(
+      'tryon.unsupported.desc',
+      'Lütfen PNG ya da JPG/JPEG formatında bir fotoğraf seçin. WEBP/HEIC şu anda desteklenmeyebilir.',
+    );
+
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: false,
+      backgroundColor: theme.colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => Padding(
+        padding: const EdgeInsets.fromLTRB(20, 18, 20, 16 + 12),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 56, height: 56,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.errorContainer,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Icon(Icons.error_outline_rounded,
+                  color: theme.colorScheme.onErrorContainer, size: 32),
+            ),
+            const SizedBox(height: 14),
+            Text(title,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
+            const SizedBox(height: 8),
+            Text(desc,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurface.withOpacity(.75),
+                )),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text(_trOr('common.close', 'Kapat')),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: FilledButton(
+                    onPressed: () async {
+                      // yeniden seçim
+                      if (forModel) {
+                        await vm.pickModelPhoto();
+                      } else {
+                        await vm.pickGarmentPhoto();
+                      }
+                      if (mounted) Navigator.pop(context);
+                      // seçilen yenisi de uygunsuzsa kullanıcı tekrar uyarılacak
+                      final path = forModel ? vm.modelPhoto?.path : vm.garmentPhoto?.path;
+                      if (path != null && !_isSupportedPath(path)) {
+                        // VM’e dokunmadan yalnızca uyarı veriyoruz
+                        if (mounted) {
+                          await _showUnsupportedSheet(forModel: forModel, vm: vm);
+                        }
+                      }
+                      setState(() {}); // görüntüyü tazele
+                    },
+                    child: Text(_trOr('tryon.unsupported.pick_again', 'Başka fotoğraf seç')),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -43,62 +138,50 @@ class _TryOnWizardViewState extends State<TryOnWizardView> {
     return (v == key) ? fallback : v;
   }
 
- // Hata mesajını kullanıcı dostu ipuçlarına çevir (i18n)
-List<String> _buildUserTips(String? err) {
-  final tips = <String>[];
-  final s = (err ?? '').toLowerCase();
+  // ---------- (mevcut hata -> ErrorView yönlendirme) ----------
+  List<String> _buildUserTips(String? err) {
+    final tips = <String>[];
+    final s = (err ?? '').toLowerCase();
+    final isNetwork = s.contains('socketexception') ||
+        s.contains('failed host lookup') ||
+        s.contains('network') ||
+        (s.contains('http') && s.contains('timeout'));
+    final isInvalidImage = s.contains('invalid image') ||
+        s.contains('expecting a valid url or base64') ||
+        s.contains('unsupported') ||
+        s.contains('webp') ||
+        s.contains('heic') ||
+        s.contains('image data');
 
-  final isNetwork = s.contains('socketexception') ||
-      s.contains('failed host lookup') ||
-      s.contains('network') ||
-      (s.contains('http') && s.contains('timeout'));
-
-  final isInvalidImage = s.contains('invalid image') ||
-      s.contains('expecting a valid url or base64') ||
-      s.contains('unsupported') ||
-      s.contains('webp') ||
-      s.contains('heic') ||
-      s.contains('image data');
-
-  if (isNetwork) {
-    tips.addAll([
-      _trOr('tryon.error.tips.network.0', 'İnternet bağlantınızı kontrol edin (Wi-Fi/Veri).'),
-      _trOr('tryon.error.tips.network.1', 'VPN/Proxy kullanıyorsanız kapatıp tekrar deneyin.'),
-    ]);
+    if (isNetwork) {
+      tips.addAll([
+        _trOr('tryon.error.tips.network.0', 'İnternet bağlantınızı kontrol edin (Wi-Fi/Veri).'),
+        _trOr('tryon.error.tips.network.1', 'VPN/Proxy kullanıyorsanız kapatıp tekrar deneyin.'),
+      ]);
+    }
+    if (isInvalidImage) {
+      tips.addAll([
+        _trOr('tryon.error.tips.format.0', 'PNG veya JPEG formatı kullanın (WEBP/HEIC desteklenmeyebilir).'),
+        _trOr('tryon.error.tips.format.1', 'Fotoğraf çok büyükse daha küçük bir kopyasını deneyin.'),
+      ]);
+    }
+    if (tips.isEmpty) {
+      tips.addAll([
+        _trOr('tryon.error.tips.generic.0', 'İnternetinizi kontrol edip tekrar deneyin.'),
+        _trOr('tryon.error.tips.generic.1', 'PNG/JPEG formatında bir fotoğraf seçin.'),
+      ]);
+    }
+    return tips;
   }
 
-  if (isInvalidImage) {
-    tips.addAll([
-      _trOr('tryon.error.tips.format.0', 'Lütfen PNG veya JPEG formatında fotoğraf seçin (WEBP/HEIC desteklenmeyebilir).'),
-      _trOr('tryon.error.tips.format.1', 'Fotoğraf çok büyükse yeniden seçin ya da daha küçük bir kopyasını kullanın.'),
-    ]);
-  }
-
-  if (tips.isEmpty) {
-    tips.addAll([
-      _trOr('tryon.error.tips.generic.0', 'İnternet bağlantınızı kontrol edin ve tekrar deneyin.'),
-      _trOr('tryon.error.tips.generic.1', 'PNG/JPEG formatında bir fotoğraf seçin.'),
-    ]);
-  }
-
-  return tips;
-}
-
-
-  // Hata oluştuysa kullanıcıyı error sayfasına yönlendir
   void _maybeOpenError(TryonViewModel vm) {
     if (_errorPushed || vm.state != TryonState.error) return;
     _errorPushed = true;
-
-    // ham hatayı sadece logla (kullanıcıya gösterme)
     if (vm.errorMessage != null && vm.errorMessage!.isNotEmpty) {
       // ignore: avoid_print
       print('TryOn error: ${vm.errorMessage}');
-      // TODO: Crashlytics vb. varsa burada kaydedebilirsiniz.
     }
-
     final tips = _buildUserTips(vm.errorMessage);
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       appNavigatorKey.currentState?.push(
         MaterialPageRoute(
@@ -106,9 +189,8 @@ List<String> _buildUserTips(String? err) {
             title: _trOr('tryon.error.title', 'Hay aksi! Bir sorun oluştu'),
             subtitle: _trOr('tryon.error.subtitle',
                 'İşlemi tamamlayamadık. Lütfen tekrar deneyin.'),
-            tips: tips, // ✅ kullanıcıya ipuçlarını göster
+            tips: tips,
             onRetry: () {
-              // hata durumunu sıfırla ve geri dön
               vm.errorMessage = null;
               vm.state = TryonState.idle;
               vm.notifyListeners();
@@ -127,7 +209,6 @@ List<String> _buildUserTips(String? err) {
       builder: (context, vm, _) {
         final theme = Theme.of(context);
 
-        // Hata yakalama/redirect
         _maybeOpenError(vm);
 
         String catLabel(GarmentCategory c) => _trOr('tryon.category.${c.name}', c.name);
@@ -138,10 +219,7 @@ List<String> _buildUserTips(String? err) {
           if (!vm.canSubmitFromConfirm || _submitting) return;
           setState(() => _submitting = true);
 
-          // 1) kota kontrolü
           final qr = await vm.checkQuotaOnly();
-
-          // 2) yetmiyorsa upsell
           if (!qr.allowed) {
             setState(() => _submitting = false);
             final isFree = qr.plan == 'free';
@@ -208,13 +286,35 @@ List<String> _buildUserTips(String? err) {
             return;
           }
 
-          // 3) hak varsa processing'e
           if (mounted) {
             setState(() => _submitting = false);
             appNavigatorKey.currentState?.push(
               MaterialPageRoute(builder: (_) => const ProcessingView()),
             );
           }
+        }
+
+        Widget _inlineInvalidHint() {
+          return Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(Icons.info_outline_rounded, color: Colors.red, size: 18),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    _trOr('tryon.unsupported.inline',
+                        'Bu fotoğraf türü desteklenmiyor. PNG veya JPG seçin.'),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: Colors.red[700],
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
         }
 
         Widget actionsBar({
@@ -232,7 +332,7 @@ List<String> _buildUserTips(String? err) {
               if (showBack) const SizedBox(width: 12),
               if (showNext)
                 FilledButton(
-                  onPressed: vm.goNext,
+                  onPressed: showNext ? vm.goNext : null,
                   child: Text(tr('tryon.actions.next')),
                 ),
               if (showSubmit)
@@ -247,7 +347,8 @@ List<String> _buildUserTips(String? err) {
 
         Widget stepBody() {
           switch (vm.step) {
-            case TryonStep.model:
+            case TryonStep.model: {
+              final invalid = !_isSupportedPath(vm.modelPhoto?.path);
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -255,20 +356,34 @@ List<String> _buildUserTips(String? err) {
                   ImagePickCard(
                     title: tr('tryon.model.title'),
                     subtitle: tr('tryon.model.subtitle'),
-                    onTap: vm.pickModelPhoto,
+                    onTap: () async {
+                      await vm.pickModelPhoto();
+                      final p = vm.modelPhoto?.path;
+                      if (p != null && !_isSupportedPath(p)) {
+                        await _showUnsupportedSheet(forModel: true, vm: vm);
+                      }
+                      setState(() {}); // kartı tazele
+                    },
                     path: vm.modelPhoto?.path,
                   ),
+                  if (invalid) _inlineInvalidHint(),
                   const SizedBox(height: 16),
                   Text(
                     tr('tryon.model.tip'),
                     style: theme.textTheme.bodyMedium?.copyWith(color: Colors.black54),
                   ),
                   const SizedBox(height: 20),
-                  actionsBar(showBack: false, showNext: vm.canNextFromModel, showSubmit: false),
+                  actionsBar(
+                    showBack: false,
+                    showNext: vm.canNextFromModel && !invalid, // ❗ geçişi engelle
+                    showSubmit: false,
+                  ),
                 ],
               );
+            }
 
-            case TryonStep.garment:
+            case TryonStep.garment: {
+              final invalid = !_isSupportedPath(vm.garmentPhoto?.path);
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -276,18 +391,31 @@ List<String> _buildUserTips(String? err) {
                   ImagePickCard(
                     title: tr('tryon.garment.title'),
                     subtitle: tr('tryon.garment.subtitle'),
-                    onTap: vm.pickGarmentPhoto,
+                    onTap: () async {
+                      await vm.pickGarmentPhoto();
+                      final p = vm.garmentPhoto?.path;
+                      if (p != null && !_isSupportedPath(p)) {
+                        await _showUnsupportedSheet(forModel: false, vm: vm);
+                      }
+                      setState(() {});
+                    },
                     path: vm.garmentPhoto?.path,
                   ),
+                  if (invalid) _inlineInvalidHint(),
                   const SizedBox(height: 16),
                   Text(
                     tr('tryon.garment.tip'),
                     style: theme.textTheme.bodyMedium?.copyWith(color: Colors.black54),
                   ),
                   const SizedBox(height: 20),
-                  actionsBar(showBack: true, showNext: vm.canNextFromGarment, showSubmit: false),
+                  actionsBar(
+                    showBack: true,
+                    showNext: vm.canNextFromGarment && !invalid, // ❗ geçişi engelle
+                    showSubmit: false,
+                  ),
                 ],
               );
+            }
 
             case TryonStep.confirm:
               return Column(
@@ -367,7 +495,6 @@ List<String> _buildUserTips(String? err) {
                 StepHeader(currentIndex: stepIndex(vm.step)),
                 const SizedBox(height: 12),
                 stepBody(),
-                // ❗ Inline hata YOK — hata olursa TryonErrorView açılıyor.
               ],
             ),
           ),
