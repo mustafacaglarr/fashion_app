@@ -64,6 +64,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '547880124958',
     projectId: 'fashion-ai-c2c4d',
     storageBucket: 'fashion-ai-c2c4d.firebasestorage.app',
+    androidClientId: '547880124958-j2pajrake71g7n93md2252vehbffgv2o.apps.googleusercontent.com',
+    iosClientId: '547880124958-6g84aos3menmotk2al2aeuol72bc2j42.apps.googleusercontent.com',
     iosBundleId: 'com.caglar.fashionApp',
   );
 
@@ -73,6 +75,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '547880124958',
     projectId: 'fashion-ai-c2c4d',
     storageBucket: 'fashion-ai-c2c4d.firebasestorage.app',
+    androidClientId: '547880124958-j2pajrake71g7n93md2252vehbffgv2o.apps.googleusercontent.com',
+    iosClientId: '547880124958-6g84aos3menmotk2al2aeuol72bc2j42.apps.googleusercontent.com',
     iosBundleId: 'com.caglar.fashionApp',
   );
 
@@ -85,4 +89,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'fashion-ai-c2c4d.firebasestorage.app',
     measurementId: 'G-Q2YM6M0DRP',
   );
+
 }
